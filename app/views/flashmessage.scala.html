@@ -1,0 +1,20 @@
+@(flash: Flash)
+
+<div class="row">
+@flash.get("error").map { error =>
+	<div class="col-md-12">
+		<div class="alert alert-danger alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			<strong>Erreur !</strong> @error
+		</div>
+	</div>
+}
+@flash.get("success").map { success =>
+	<div class="col-md-12">
+		<div class="alert alert-success alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			@success
+		</div>
+	</div>
+}
+</div>

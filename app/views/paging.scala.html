@@ -1,0 +1,46 @@
+@(paging: Paging, redirect: (Long, Int) => play.mvc.Call, id: Long)
+
+@isCurrent(page: Int, currentPage: Int) = @{
+	if(page == currentPage)
+		"active"
+	else
+		""
+}
+
+@if(paging.numPages > 0) {
+	<ul class="pagination pagination-sm thread-pagination">
+	@if(paging.current == 1) {
+		<li class="disabled"><a href="#">&laquo;</a></li>
+	} else {
+		<li><a href="@redirect(id, 1)">&laquo;</a></li>
+	}
+	
+	@if(paging.numPages <= 5) {
+		@for(i <- 1 to paging.numPages + 1) {
+			<li class=@isCurrent(i, paging.current)><a href="@redirect(id, i)">@i</a></li>
+		}
+	} else { @if(paging.current <= 3) {
+		@for(i <- 1 to Math.max(paging.current + 1, 4)) {
+			<li class=@isCurrent(i, paging.current)><a href="@redirect(id, i)">@i</a></li>
+		}
+			<li class="disabled"><span>...</span></li>
+	} else { @if(paging.current > paging.numPages-2) {
+			<li class="disabled"><span>...</span></li>
+		@for(i <- Math.min(paging.current - 1, paging.numPages - 2) to paging.numPages + 1) {
+			<li class=@isCurrent(i, paging.current)><a href="@redirect(id, i)">@i</a></li>
+		}
+	} else {
+			<li class="disabled"><span>...</span></li>
+		@for(i <- paging.current-1 to paging.current+1) {
+			<li class=@isCurrent(i, paging.current)><a href="@redirect(id, i)">@i</a></li>
+		}
+			<li class="disabled"><span>...</span></li>
+	}}}
+	
+	@if(paging.current == paging.numPages + 1) {
+		<li class="disabled"><a href="#">&raquo;</a></li>
+	} else {
+		<li><a href="@redirect(id, paging.numPages + 1)">&raquo;</a></li>
+	}
+	</ul>
+}			

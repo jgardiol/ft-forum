@@ -1,0 +1,83 @@
+@(forum: Forum, thread: Thread, posts: List[(Post, User)], paging: Paging, user: Option[User])(implicit flash: Flash)
+
+@import helper._
+
+@formatted(date: java.util.Date) = @{
+		val formatter: java.text.SimpleDateFormat = new java.text.SimpleDateFormat("dd-MM-YYYY HH:mm")
+		formatter.format(date)
+}
+
+@threadHeader(thread: Thread, forum: Forum) = {
+	<div class="thread-header">
+			<div class="row">
+				<div class="col-md-8">
+					<ol class="breadcrumb thread-title">
+						<li><a href="@routes.Application.index">Forum</a></li>
+						<li><a href="@routes.Application.forum(forum.id, 1)">@forum.name</a></li>
+						<li class="active">@thread.title</li>
+					</ol>
+				</div>
+				<div class="col-md-4 text-right">
+					@views.html.paging(paging, routes.Application.thread, thread.id)
+				</div>
+			</div>
+		</div>
+}
+
+@main("Forum - " + forum.name + " - " + thread.title, user) {
+	
+	<div class="container">
+		@flashmessage(flash)
+    		
+		@threadHeader(thread, forum)
+		
+		@defining((paging.current-1) * controllers.Application.pageSize + 1) { offset =>
+		@for((post, i) <- posts.zipWithIndex) {
+			<div class="post">
+			<div class="post-header">
+				<div class="row">
+					<div class="col-md-6">
+						<small>Post&eacute; le @formatted(post._1.created)</small>
+					</div>
+					<div class="col-md-6 text-right">
+						<a href="#@(i+offset)" name="@(i+offset)">#@(i+offset)</a>
+					</div>
+				</div>
+			</div>
+			<div class="post-body">
+				<table width="100%">
+					<tr>
+						<td class="cell-profile">
+							@post._2.name
+							<br/>
+							<small>@post._2.role</small>
+							<br/><br/>
+							Main: <a href="#">@post._2.main</a>
+						</td>
+						<td class="cell-content">@post._1.content</td>	
+					</tr>
+				</table>
+			</div>
+		</div>
+		}}
+		
+		@threadHeader(thread, forum)
+		
+		@user.map { _ =>
+			@form(routes.Application.newpost(thread.id)) {
+				<div class="row"><div class="col-md-8 col-md-offset-2">
+				<h3>R&eacute;ponse</h3>
+				<form role="form">
+					<div class="form-group">
+						<label for="content">Contenu <small>(Formatage avec <a href="http://fr.wikipedia.org/wiki/Markdown">Markdown</a>)</small></label>
+						<textarea class="form-control" id="content" name="content" rows="8"></textarea>
+					</div>
+					<div class="text-center">
+						<input type="submit" class="btn btn-primary" value="Envoyer">
+					</div>
+			}
+				</div></div>
+			</div>
+		}
+	</div>
+}

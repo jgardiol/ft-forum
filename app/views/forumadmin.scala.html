@@ -1,0 +1,58 @@
+@(forums: List[Forum], user: Option[User])(implicit flash: Flash)
+
+@import helper._
+
+@main("Administration", user) {
+	
+	<div class="container">	
+		@flashmessage(flash)
+	
+		<div class="thread-header">
+			<div class="row">
+				<div class="col-md-12">
+					<h3>Administration - Forums</h3>
+				</div>
+			</div>
+		</div>
+		
+		<div>
+			<div>
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Nom</th>
+							<th>Description</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+					@forums.map { f =>
+						<tr>
+							@form(routes.Application.updateForum(f.id)) {
+								<td>@f.id</td>
+								<td><input type="text" class="form-control" name="name" id="name" value="@f.name"></td>
+								<td><input type="text" class="form-control" name="description" id="description" value="@f.description"></td>
+								<td><input type="submit" class="btn btn-default" value="Modifier"></td>
+							}
+							<form method="POST" action="@routes.Application.deleteForum(f.id)">
+								<td><input type="submit" class="btn btn-danger" value="Supprimer"></td>
+							</form>
+						</tr>
+					}
+						<tr>
+							@form(routes.Application.createForum()) {
+								<td></td>
+								<td><input type="text" class="form-control" name="name" id="name" placeholder="Nom du forum"></td>
+								<td><input type="text" class="form-control" name="description" id="description" placeholder="Description"></td>
+								<td><input type="submit" class="btn btn-success" value="Cr&eacute;er"></td>
+							}
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+}

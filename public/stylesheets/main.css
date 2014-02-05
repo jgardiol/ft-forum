@@ -1,0 +1,139 @@
+body
+{
+	background-color: #001520;
+}
+
+textarea
+{
+	resize: none;
+}
+
+.thread-header
+{
+	overflow: hidden;
+	margin: 5px;
+}
+
+.thread-title
+{
+	margin: 0;
+	padding: 5;
+	background-color: white;
+}
+
+.thread-pagination
+{
+	margin: 3px 3px 3px 3px;
+}
+
+.thread-buttons
+{
+}
+
+.banner
+{
+	margin-left: 10%;
+}
+
+.container
+{
+	background-color: #FFFFFF;
+	margin-left: 10%;
+	margin-right: 10%;
+	margin-bottom: 100px;
+	width: 1024px;
+	padding: 10px;
+	border-radius: 4px;
+}
+
+.nav-container
+{
+	margin-left: 10%;
+	margin-right: 10%;
+	margin-top: 20px;
+	width: 1024px;
+}
+
+.post-header
+{
+	color: white;
+	background-color: #428bca;
+	padding: 2px;
+}
+
+.post-header a:link
+{
+	color: white;
+}
+
+.post-header a:visited
+{
+	color: white;
+}
+
+.post
+{
+	margin: 5px;
+	border: 1px solid #ddd;
+}
+
+.forums
+{
+	margin: 5px;
+	border: 1px solid #ddd;
+}
+
+.post-body
+{
+}
+
+td
+{
+	padding: 10px;
+}
+
+th
+{
+	padding: 10px;
+}
+
+.cell-profile
+{
+	width: 15%;
+	border-right: 1px solid #ddd;
+	vertical-align: top;
+}
+
+.cell-content
+{
+	width: 85%;
+	vertical-align: top;
+}
+
+.forum-table-header
+{
+	color: white;
+	background-color: #428bca;
+	padding: 2px;
+}
+
+.cell-forum-name
+{
+	width: 55%;
+	border-bottom: 1px solid #ddd;
+}
+
+.cell-forum-threads
+{
+	width: 15%;
+	text-align: center;
+	border-right: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+}
+
+.cell-forum-message
+{
+	width: 30%;
+	border-bottom: 1px solid #ddd;
+}

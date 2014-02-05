@@ -1,0 +1,51 @@
+@(forums: List[(Forum, ForumInfo)], user: Option[User])(implicit flash: Flash)
+
+@formatted(date: java.util.Date) = @{
+		val formatter: java.text.SimpleDateFormat = new java.text.SimpleDateFormat("dd-MM-YYYY HH:mm")
+		formatter.format(date)
+}
+
+@main("Forum", user) {
+	
+	<div class="container">	
+		@flashmessage(flash)
+	
+		<div class="thread-header">
+			<div class="row">
+				<div class="col-md-12">
+					<ol class="breadcrumb thread-title">
+						<li class="active">Forum</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		
+		<div class="forums">
+			<div class="post-body">
+				<table width="100%">
+					<tr>
+						<th class="cell-forum-name forum-table-header">Forum</th>
+						<th class="cell-forum-threads forum-table-header"># Sujets</th>
+						<th class="cell-forum-message forum-table-header">Dernier message</th>
+					</tr>
+					
+					@forums.map { forumData =>
+						<tr>
+							<td class="cell-forum-name"><a href="@routes.Application.forum(forumData._1.id, 1)">@forumData._1.name</a><br/><small>@forumData._1.description</small></td>
+							<td class="cell-forum-threads">@forumData._2.numThreads</td>
+							@forumData._2.lastThread match {
+								case Some(thread) => {
+									<td class="cell-forum-message"><a href="@routes.Application.thread(thread.id, 1)">@thread.title</a><br/><small>par @forumData._2.lastThreadAuthor.get.name, @formatted(forumData._2.created)</small></td>
+								}
+								case None => {
+									<td class="cell-forum-message">Aucun message<br/><small>&nbsp;</small></td>
+								}
+							}
+						</tr>
+					}
+				</table>
+			</div>
+		</div>
+	</div>
+
+}
