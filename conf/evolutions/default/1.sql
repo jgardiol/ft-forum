@@ -7,7 +7,8 @@ CREATE sequence forum_id_seq;
 CREATE TABLE forums (
 	id integer NOT NULL DEFAULT nextval('forum_id_seq'),
 	name varchar(255) NOT NULL,
-	description varchar(255)
+	description varchar(255),
+	PRIMARY KEY(id)
 );
 
 CREATE SEQUENCE user_id_seq;
@@ -17,7 +18,8 @@ CREATE TABLE users (
 	name varchar(255) NOT NULL,
 	password varchar(255) NOT NULL,
 	main varchar(255),
-	role varchar(255) NOT NULL
+	role varchar(255) NOT NULL,
+	PRIMARY KEY(id)
 );
 
 INSERT INTO users VALUES ('0', '[DELETED]', 'password', '', '[deleted]');
@@ -30,7 +32,8 @@ CREATE TABLE threads (
 	forum_id integer NOT NULL,
 	user_id integer DEFAULT 0 NOT NULL,
 	FOREIGN KEY(forum_id) REFERENCES forums(id) ON DELETE CASCADE,
-	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET DEFAULT
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET DEFAULT,
+	PRIMARY KEY(id)
 );
 
 CREATE SEQUENCE post_id_seq;
@@ -42,7 +45,8 @@ CREATE TABLE posts (
 	thread_id integer NOT NULL,
 	user_id integer NOT NULL,
 	foreign key(thread_id) references threads(id) ON DELETE CASCADE,
-	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET DEFAULT
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET DEFAULT,
+	PRIMARY KEY(id)
 );
 
 # --- !Downs
