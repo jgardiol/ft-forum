@@ -57,7 +57,7 @@ object Forum {
     		  ON t.id = p.thread_id
           INNER JOIN
           (
-    		  SELECT thread_id, MAX(created) last
+    		  SELECT thread_id, MAX(created) AS last
     		  FROM posts
     		  GROUP BY thread_id
           ) temp ON p.thread_id = temp.thread_id AND p.created = temp.last
