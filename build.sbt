@@ -8,7 +8,6 @@ libraryDependencies ++= Seq(
   cache,
   "org.mindrot" % "jbcrypt" % "0.3m",
   "postgresql" % "postgresql" % "9.1-901.jdbc4"
-
 )
 
 play.Project.playScalaSettings
