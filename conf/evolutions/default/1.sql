@@ -2,8 +2,6 @@
 
 # --- !Ups
 
-SET IGNORECASE TRUE;
-
 CREATE sequence forum_id_seq;
 
 CREATE TABLE forum (
