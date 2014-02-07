@@ -59,7 +59,6 @@ object Application extends Controller {
         Redirect(currentUri).flashing("error" -> "Vous devez saisir un nom d'utilisateur et un mot de passe.")
       },
       userData => {
-        Logger.info("data: " + userData)
         user = User.authenticate(userData._1, userData._2)
         user match {
           case Some(user) => Redirect(currentUri).withSession("name" -> user.name)
@@ -83,7 +82,6 @@ object Application extends Controller {
         Redirect(currentUri).flashing("error" -> "Formulaire invalide, veuillez réessayer.")
       },
       data => {
-        Logger.info("data: " + data)
         if (data._2 != data._3)
           Redirect(currentUri).flashing("error" -> "Les mots de passe ne correspondent pas.")
         else {
@@ -219,11 +217,9 @@ object Application extends Controller {
       case Some(user) => {
         newthreadForm.bindFromRequest.fold(
           formWithErrors => {
-            Logger.info("form with errors")
             Redirect(routes.Application.forum(forumId, 1)).flashing("error" -> "Vous devez remplir les champs !")
           },
           threadData => {
-            Logger.info("data: " + threadData)
             val threadId = Thread.create(threadData._1, user.id, forumId)
             Post.create(threadData._2, new java.util.Date(), threadId, user.id)
             Redirect(routes.Application.thread(threadId, 1)).flashing("success" -> "Votre sujet a bien été créé.")
@@ -240,7 +236,6 @@ object Application extends Controller {
       case Some(user) => {
         newpostForm.bindFromRequest.fold(
           formWithErrors => {
-            Logger.info("form with errors")
             Redirect(routes.Application.thread(threadId, 1)).flashing("error" -> "Vous devez remplir les champs !")
           },
           postData => {
@@ -261,10 +256,6 @@ object UserAction extends ActionBuilder[Request] {
     }
 
     Application.currentUri = request.uri
-
-    Logger.info("uri: " + request.uri)
-    Logger.info("user: " + Application.user)
-
     block(request)
   }
 }

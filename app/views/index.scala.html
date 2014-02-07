@@ -38,7 +38,7 @@
 									<td class="cell-forum-message"><a href="@routes.Application.thread(thread.id, 1)">@thread.title</a><br/><small>par @forumData._2.lastThreadAuthor.get.name, @formatted(forumData._2.created)</small></td>
 								}
 								case None => {
-									<td class="cell-forum-message">Aucun message<br/><small>&nbsp;</small></td>
+									<td class="cell-forum-message">Aucun message</td>
 								}
 							}
 						</tr>
