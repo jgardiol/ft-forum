@@ -72,7 +72,7 @@ object User {
 
   def getById(id: Long): Option[User] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM users WHERE user.id = {id}").on(
+      SQL("SELECT * FROM users WHERE users.id = {id}").on(
         'id -> id).as(simple.singleOpt)
     }
   }

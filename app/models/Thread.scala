@@ -60,7 +60,7 @@ object Thread {
   
   def getById(id: Long): Option[Thread] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM threads WHERE thread.id = {id}").on(
+      SQL("SELECT * FROM threads WHERE threads.id = {id}").on(
           'id -> id).as(simple.singleOpt)
       
     }
