@@ -40,7 +40,7 @@ CREATE SEQUENCE post_id_seq;
 
 CREATE TABLE posts (
 	id integer NOT NULL DEFAULT nextval('post_id_seq'),
-	content clob,
+	content text,
 	created timestamp,
 	thread_id integer NOT NULL,
 	user_id integer NOT NULL,
