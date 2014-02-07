@@ -23,7 +23,7 @@ object User {
 
   def all(): List[User] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM user").as(simple*)
+      SQL("SELECT * FROM users").as(simple*)
     }
   }
 
@@ -49,7 +49,7 @@ object User {
         val hashed = BCrypt.hashpw(password, BCrypt.gensalt())
 
         DB.withConnection { implicit c =>
-          SQL("INSERT INTO user(name, password, main, role) VALUES({name}, {password}, {main}, {role})").on(
+          SQL("INSERT INTO users(name, password, main, role) VALUES({name}, {password}, {main}, {role})").on(
             'name -> name,
             'password -> hashed,
             'main -> main,
@@ -63,7 +63,7 @@ object User {
 
   def update(id: Long, main: String, role: String) = {
     DB.withConnection { implicit c =>
-      SQL("UPDATE user SET main={main}, role={role} WHERE id={id}").on(
+      SQL("UPDATE users SET main={main}, role={role} WHERE id={id}").on(
         'id -> id,
         'main -> main,
         'role -> role).executeUpdate()
@@ -72,7 +72,7 @@ object User {
 
   def getById(id: Long): Option[User] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM user WHERE user.id = {id}").on(
+      SQL("SELECT * FROM users WHERE user.id = {id}").on(
         'id -> id).as(simple.singleOpt)
     }
   }
@@ -80,7 +80,7 @@ object User {
   // Gets a user matching the name, if it exists
   def getByName(name: String): Option[User] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM user WHERE name = {name}").on(
+      SQL("SELECT * FROM users WHERE LOWER(name) = LOWER({name})").on(
         'name -> name).as(simple.singleOpt)
     }
   }

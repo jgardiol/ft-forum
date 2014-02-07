@@ -4,7 +4,7 @@
 
 CREATE sequence forum_id_seq;
 
-CREATE TABLE forum (
+CREATE TABLE forums (
 	id integer NOT NULL DEFAULT nextval('forum_id_seq'),
 	name varchar(255) NOT NULL,
 	description varchar(255)
@@ -12,7 +12,7 @@ CREATE TABLE forum (
 
 CREATE SEQUENCE user_id_seq;
 
-CREATE TABLE user (
+CREATE TABLE users (
 	id integer NOT NULL DEFAULT nextval('user_id_seq'),
 	name varchar(255) NOT NULL,
 	password varchar(255) NOT NULL,
@@ -20,38 +20,38 @@ CREATE TABLE user (
 	role varchar(255) NOT NULL
 );
 
-INSERT INTO user VALUES ('0', '[DELETED]', 'password', '', '[deleted]');
+INSERT INTO users VALUES ('0', '[DELETED]', 'password', '', '[deleted]');
 
 CREATE SEQUENCE thread_id_seq;
 
-CREATE TABLE thread (
+CREATE TABLE threads (
 	id integer NOT NULL DEFAULT nextval('thread_id_seq'),
 	title varchar(255) NOT NULL,
 	forum_id integer NOT NULL,
 	user_id integer DEFAULT 0 NOT NULL,
-	FOREIGN KEY(forum_id) REFERENCES forum(id) ON DELETE CASCADE,
-	FOREIGN KEY(user_id) REFERENCES user(id) ON DELETE SET DEFAULT
+	FOREIGN KEY(forum_id) REFERENCES forums(id) ON DELETE CASCADE,
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET DEFAULT
 );
 
 CREATE SEQUENCE post_id_seq;
 
-CREATE TABLE post (
+CREATE TABLE posts (
 	id integer NOT NULL DEFAULT nextval('post_id_seq'),
 	content clob,
 	created timestamp,
 	thread_id integer NOT NULL,
 	user_id integer NOT NULL,
-	foreign key(thread_id) references thread(id) ON DELETE CASCADE,
-	FOREIGN KEY(user_id) REFERENCES user(id) ON DELETE SET DEFAULT
+	foreign key(thread_id) references threads(id) ON DELETE CASCADE,
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET DEFAULT
 );
 
 # --- !Downs
 
-DROP TABLE forum IF EXISTS;
+DROP TABLE forums IF EXISTS;
 DROP SEQUENCE forum_id_seq IF EXISTS;
-DROP TABLE post IF EXISTS;
+DROP TABLE posts IF EXISTS;
 DROP SEQUENCE post_id_seq IF EXISTS;
-DROP TABLE thread IF EXISTS;
+DROP TABLE threads IF EXISTS;
 DROP SEQUENCE thread_id_seq IF EXISTS;
-DROP TABLE user IF EXISTS;
+DROP TABLE users IF EXISTS;
 DROP SEQUENCE user_id_seq IF EXISTS;

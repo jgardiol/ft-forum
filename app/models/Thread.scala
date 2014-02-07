@@ -22,13 +22,13 @@ object Thread {
 
   def create(title: String, userId: Long, forumId: Long): Long = {
     DB.withConnection { implicit c =>
-      SQL("INSERT INTO thread(title, user_id, forum_id) VALUES ({title}, {userId}, {forumId})").on(
+      SQL("INSERT INTO threads(title, user_id, forum_id) VALUES ({title}, {userId}, {forumId})").on(
         'title -> title,
         'userId -> userId,
         'forumId -> forumId).executeUpdate()
         
         
-      SQL("SELECT * FROM thread WHERE user_id = {user_id} AND forum_id = {forum_id} ORDER BY id DESC").on(
+      SQL("SELECT * FROM threads WHERE user_id = {user_id} AND forum_id = {forum_id} ORDER BY id DESC").on(
           'user_id -> userId,
           'forum_id -> forumId).as(simple *).head.id
     }
@@ -36,7 +36,7 @@ object Thread {
 
   def getPosts(threadId: Long): List[Post] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM post WHERE post.thread_id = {thread_id} ORDER BY created ASC").on(
+      SQL("SELECT * FROM posts WHERE post.thread_id = {thread_id} ORDER BY created ASC").on(
           'thread_id -> threadId).as(Post.simple *)
     }
   }
@@ -47,9 +47,9 @@ object Thread {
     DB.withConnection { implicit c =>
       SQL("""
           SELECT *
-          FROM post          
-          WHERE post.thread_id = {thread_id}
-          ORDER BY post.created ASC
+          FROM posts
+          WHERE posts.thread_id = {thread_id}
+          ORDER BY posts.created ASC
           LIMIT {pageSize} OFFSET {offset}
           """).on(
         'thread_id -> threadId,
@@ -60,7 +60,7 @@ object Thread {
   
   def getById(id: Long): Option[Thread] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM thread WHERE thread.id = {id}").on(
+      SQL("SELECT * FROM threads WHERE thread.id = {id}").on(
           'id -> id).as(simple.singleOpt)
       
     }
@@ -68,7 +68,7 @@ object Thread {
   
   def getLastPost(threadId: Long): Post = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM post WHERE thread_id = {thread_id} ORDER BY post.created DESC").on(
+      SQL("SELECT * FROM posts WHERE thread_id = {thread_id} ORDER BY posts.created DESC").on(
           'thread_id -> threadId).as(Post.simple *).head
       }
   }
@@ -77,7 +77,7 @@ object Thread {
     DB.withConnection { implicit c =>
       SQL("""
           SELECT COUNT(*) AS num_posts
-          FROM post
+          FROM posts
           WHERE thread_id = {id}
           """).on(
               'id -> id).as(get[Long]("num_posts").single)

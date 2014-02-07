@@ -24,7 +24,7 @@ object Post {
   
   def create(content: String, created: Date, threadId: Long, userId: Long) {
     DB.withConnection { implicit c =>
-      SQL("INSERT INTO post(content, created, thread_id, user_id) VALUES({content}, {created}, {thread_id}, {user_id})").on(
+      SQL("INSERT INTO posts(content, created, thread_id, user_id) VALUES({content}, {created}, {thread_id}, {user_id})").on(
           'content -> content,
           'created -> created,
           'thread_id -> threadId,

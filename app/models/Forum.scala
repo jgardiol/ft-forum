@@ -12,19 +12,19 @@ case class ForumInfo(id: Long, numThreads: Long, lastThread: Option[Thread], las
 
 object Forum {
   def all(): List[Forum] = DB.withConnection { implicit c =>
-    SQL("SELECT * FROM forum").as(forum *)
+    SQL("SELECT * FROM forums").as(forum *)
   }
 
   def getById(id: Long): Option[Forum] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM forum WHERE id = {id}").on(
+      SQL("SELECT * FROM forums WHERE id = {id}").on(
         'id -> id).as(forum.singleOpt)
     }
   }
 
   def create(name: String, description: String) {
     DB.withConnection { implicit c =>
-      SQL("INSERT INTO forum(name, description) VALUES ({name}, {description})").on(
+      SQL("INSERT INTO forums(name, description) VALUES ({name}, {description})").on(
         'name -> name,
         'description -> description).executeUpdate()
     }
@@ -32,7 +32,7 @@ object Forum {
   
   def update(id: Long, name: String, description: String) {
     DB.withConnection { implicit c =>
-      SQL("UPDATE forum SET name={name}, description={description} WHERE id={id}").on(
+      SQL("UPDATE forums SET name={name}, description={description} WHERE id={id}").on(
         'id -> id,
         'name -> name,
         'description -> description).executeUpdate()
@@ -41,7 +41,7 @@ object Forum {
 
   def delete(id: Long) {
     DB.withConnection { implicit c =>
-      SQL("DELETE FROM forum WHERE id={id}").on(
+      SQL("DELETE FROM forums WHERE id={id}").on(
         'id -> id).executeUpdate()
     }
   }
@@ -52,13 +52,13 @@ object Forum {
     DB.withConnection { implicit c =>
       SQL("""
           SELECT t.*
-          FROM thread t 
-          INNER JOIN post p
+          FROM threads t 
+          INNER JOIN posts p
     		  ON t.id = p.thread_id
           INNER JOIN
           (
     		  SELECT thread_id, MAX(created) last
-    		  FROM post
+    		  FROM posts
     		  GROUP BY thread_id
           ) temp ON p.thread_id = temp.thread_id AND p.created = temp.last
           WHERE t.forum_id = {id}
@@ -73,7 +73,7 @@ object Forum {
 
   def getThreads(id: Long): List[Thread] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM thread WHERE forum_id = {id}").on(
+      SQL("SELECT * FROM threads WHERE forum_id = {id}").on(
         'id -> id).as(Thread.simple *)
     }
   }
@@ -81,10 +81,10 @@ object Forum {
   def getLastThread(forumId: Long): Option[Thread] = {
     DB.withConnection { implicit c =>
       SQL("""
-          SELECT thread.id, thread.title, thread.user_id, thread.forum_id 
-          FROM thread INNER JOIN post ON thread.id = post.thread_id 
-          WHERE thread.forum_id = {forum_id}
-          ORDER BY post.created DESC
+          SELECT threads.id, threads.title, threads.user_id, threads.forum_id 
+          FROM threads INNER JOIN posts ON threads.id = posts.thread_id 
+          WHERE threads.forum_id = {forum_id}
+          ORDER BY posts.created DESC
           """).on(
         'forum_id -> forumId).as(Thread.simple *).headOption
     }
@@ -94,7 +94,7 @@ object Forum {
     DB.withConnection { implicit c =>
       SQL("""
           SELECT COUNT(*) AS num_threads
-          FROM thread
+          FROM threads
           WHERE forum_id = {id}
           """).on(
         'id -> id).as(get[Long]("num_threads").single)
