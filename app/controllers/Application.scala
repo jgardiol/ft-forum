@@ -25,7 +25,7 @@ object Application extends Controller {
   
   def WithUri(content: play.api.templates.HtmlFormat.Appendable)(implicit request: RequestHeader) = {
     request.session.get("name") match {
-      case Some(name) => Ok(content).withSession("uri" -> request.uri, "name" -> name)
+      case Some(name) => Ok(content).withSession("uri" -> request.uri, "username" -> name)
       case None => Ok(content).withSession("uri" -> request.uri)
     }
   }
