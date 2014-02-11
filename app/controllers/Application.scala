@@ -24,7 +24,7 @@ object Application extends Controller {
   }
   
   def WithUri(content: play.api.templates.HtmlFormat.Appendable)(implicit request: RequestHeader) = {
-    request.session.get("name") match {
+    request.session.get("username") match {
       case Some(name) => Ok(content).withSession("uri" -> request.uri, "username" -> name)
       case None => Ok(content).withSession("uri" -> request.uri)
     }
@@ -40,7 +40,6 @@ object Application extends Controller {
     }
     
     WithUri(views.html.index(forums, user))
-//    Ok(views.html.index(forums, user))
   }
   
 
@@ -50,7 +49,6 @@ object Application extends Controller {
         val threads = Forum.getThreads(id, page, pageSize).map(t => (t, Thread.getThreadInfo(t.id)))
         val paging = Paging(page, (Forum.numThreads(id).toInt - 1) / pageSize)
         WithUri(views.html.forum(forum, threads, paging, user))
-//        Ok(views.html.forum(forum, threads, paging, user))
       }
       case None => NotFound
     }
@@ -62,7 +60,6 @@ object Application extends Controller {
         val forum = Forum.getById(thread.forumId).get
         val posts = Thread.getPosts(id, page, pageSize) map { post => (post, User.getById(post.userId).get) }
         val paging = Paging(page, (Thread.numPosts(id).toInt - 1) / pageSize)
-//        Ok(views.html.thread(forum, thread, posts, paging, user))
         WithUri(views.html.thread(forum, thread, posts, paging, user))
       }
       case None => NotFound
@@ -82,7 +79,7 @@ object Application extends Controller {
       userData => {
         val user = User.authenticate(userData._1, userData._2)
         user match {
-          case Some(user) => Redirect(currentUri).withSession("name" -> user.name)
+          case Some(user) => Redirect(currentUri).withSession("username" -> user.name)
           case None => Redirect(currentUri).flashing("error" -> "Mauvais nom d'utilisateur ou mot de passe")
         }
       })
@@ -107,7 +104,7 @@ object Application extends Controller {
           val user = User.create(data._1, data._2, data._4, "-")
           user match {
             case Some(user) => {
-              Redirect(currentUri).withSession("name" -> user.name).flashing("success" -> "Compte créé.")
+              Redirect(currentUri).withSession("username" -> user.name).flashing("success" -> "Compte créé.")
             }
             case None => Redirect(currentUri).flashing("error" -> "Ce nom d'utilisateur existe déjà")
           }
@@ -123,7 +120,7 @@ object Application extends Controller {
     user match {
       case Some(user) => {
         user.role match {
-          case "admin" => Ok(views.html.admin(User.all(), Some(user)))
+          case "admin" => WithUri(views.html.admin(User.all(), Some(user)))
           case _ => Redirect(routes.Application.index).flashing("error" -> "Vous n'avez pas le droit d'accéder à cette ressource.")
         }
       }
@@ -135,7 +132,7 @@ object Application extends Controller {
     user match {
       case Some(user) => {
         user.role match {
-          case "admin" => Ok(views.html.forumadmin(Forum.all(), Some(user)))
+          case "admin" => WithUri(views.html.forumadmin(Forum.all(), Some(user)))
           case _ => unauthedAction
         }
       }
