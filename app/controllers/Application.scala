@@ -11,7 +11,7 @@ import models._
 case class Paging(current: Int, numPages: Int)
 
 object Application extends Controller {
-  
+
   def user(implicit request: RequestHeader) = {
     request.session.get("username") match {
       case Some(name) => User.getByName(name)
@@ -19,7 +19,13 @@ object Application extends Controller {
     }
   }
   
-  def currentUri(implicit request: RequestHeader) = request.uri
+  def currentUri(implicit request: RequestHeader) = {
+    request.session.get("uri").getOrElse("/")
+  }
+  
+  def WithUri(content: play.api.templates.HtmlFormat.Appendable)(implicit request: RequestHeader) = {
+    Ok(content).withSession("uri" -> request.uri)
+  }
 
   val pageSize = 10
 
@@ -29,15 +35,19 @@ object Application extends Controller {
     val forums = Forum.all() map { forum =>
       (forum, Forum.getInfo(forum.id))
     }
-    Ok(views.html.index(forums, user))
+    
+    WithUri(views.html.index(forums, user))
+//    Ok(views.html.index(forums, user))
   }
+  
 
   def forum(id: Long, page: Int = 0) = Action { implicit request =>
     Forum.getById(id) match {
       case Some(forum) => {
         val threads = Forum.getThreads(id, page, pageSize).map(t => (t, Thread.getThreadInfo(t.id)))
         val paging = Paging(page, (Forum.numThreads(id).toInt - 1) / pageSize)
-        Ok(views.html.forum(forum, threads, paging, user))
+        WithUri(views.html.forum(forum, threads, paging, user))
+//        Ok(views.html.forum(forum, threads, paging, user))
       }
       case None => NotFound
     }
@@ -49,7 +59,8 @@ object Application extends Controller {
         val forum = Forum.getById(thread.forumId).get
         val posts = Thread.getPosts(id, page, pageSize) map { post => (post, User.getById(post.userId).get) }
         val paging = Paging(page, (Thread.numPosts(id).toInt - 1) / pageSize)
-        Ok(views.html.thread(forum, thread, posts, paging, user))
+//        Ok(views.html.thread(forum, thread, posts, paging, user))
+        WithUri(views.html.thread(forum, thread, posts, paging, user))
       }
       case None => NotFound
     }
@@ -70,9 +81,7 @@ object Application extends Controller {
         user match {
           case Some(user) => Redirect(currentUri).withSession("name" -> user.name)
           case None => Redirect(currentUri).flashing("error" -> "Mauvais nom d'utilisateur ou mot de passe")
-
         }
-
       })
   }
 
