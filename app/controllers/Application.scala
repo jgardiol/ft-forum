@@ -24,7 +24,10 @@ object Application extends Controller {
   }
   
   def WithUri(content: play.api.templates.HtmlFormat.Appendable)(implicit request: RequestHeader) = {
-    Ok(content).withSession("uri" -> request.uri)
+    request.session.get("name") match {
+      case Some(name) => Ok(content).withSession("uri" -> request.uri, "name" -> name)
+      case None => Ok(content).withSession("uri" -> request.uri)
+    }
   }
 
   val pageSize = 10
