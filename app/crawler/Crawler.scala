@@ -6,7 +6,6 @@ import play.api._
 import java.text.SimpleDateFormat
 import scala.collection.JavaConversions.asScalaBuffer
 
-
 object Crawler {
   case class Boss(name: String, difficulty: String)
   case class Player(name: String, spec: String, dps: Map[Boss, Double])
@@ -133,5 +132,41 @@ object Crawler {
 
     result
   }
+}
 
+case class CrawlError(id: Long, message: String, url: String)
+
+object CrawlError {
+  import play.api.db._
+  import play.api.Play.current
+
+  import anorm._
+  import anorm.SqlParser._
+
+  val simple =
+    get[Long]("id") ~
+      get[String]("message") ~
+      get[String]("url") map {
+        case id ~ message ~ url => CrawlError(id, message, url)
+      }
+
+  def all(): List[CrawlError] = {
+    DB.withConnection { implicit c =>
+      SQL("SELECT * FROM crawl_errors").as(simple *)
+    }
+  }
+
+  def create(message: String, url: String) {
+    DB.withConnection { implicit c =>
+      SQL("INSERT INTO crawl_errors(message, url) VALUES {message}, {url}").on(
+        'message -> message,
+        'url -> url).executeUpdate()
+    }
+  }
+  
+  def delete(id: Long) {
+    DB.withConnection { implicit c =>
+      SQL("DELETE FROM crawl_errors WHERE id={id}").on('id -> id).executeUpdate()
+    }
+  }
 }
