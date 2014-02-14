@@ -55,8 +55,7 @@
 				<tr>
 					<th>Rank</th>
 					<th>Name</th>
-					<th>Class</th>
-					<th>Spec</th>
+					<th>Spec & Class</th>
 					<th>Dps</th>
 					<th>Report</th>
 				</tr>
@@ -66,8 +65,7 @@
 				<tr>
 					<td>@(i+1)</td>
 					<td>@report.playerName</td>
-					<td>@controllers.Ranking.specs.get(report.spec)</td>
-					<td>@report.spec.split(" ").head</td>
+					<td>@report.spec.split(" ").head @controllers.Ranking.specs.get(report.spec)</td>
 					<td>@report.dps</td>
 					<td><a href="@controllers.Ranking.reportUrl.replaceAll("REPORT_ID", report.reportId)" target="_blank">WoL</a></td>
 				</tr>
