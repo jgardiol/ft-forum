@@ -47,7 +47,7 @@
 					@threads.map { thread =>
 						<tr>
 							<td class="cell-forum-name"><a href="@routes.Application.thread(thread._1.id, 1)">@thread._1.title</a></td>
-							<td class="cell-forum-threads">@thread._2.numPosts</td>
+							<td class="cell-forum-threads">@(thread._2.numPosts - 1)</td>
 							<td class="cell-forum-message">@thread._2.lastAuthor<br/><small>@formatted(thread._2.lastCreated)</small></td>
 						</tr>
 					}
