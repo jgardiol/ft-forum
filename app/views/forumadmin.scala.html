@@ -30,19 +30,19 @@
 					<tbody>
 					@forums.map { f =>
 						<tr>
-							@form(routes.Application.updateForum(f.id)) {
+							@form(routes.Administration.updateForum(f.id)) {
 								<td>@f.id</td>
 								<td><input type="text" class="form-control" name="name" id="name" value="@f.name"></td>
 								<td><input type="text" class="form-control" name="description" id="description" value="@f.description"></td>
 								<td><input type="submit" class="btn btn-default" value="Modifier"></td>
 							}
-							<form method="POST" action="@routes.Application.deleteForum(f.id)">
+							<form method="POST" action="@routes.Administration.deleteForum(f.id)">
 								<td><input type="submit" class="btn btn-danger" value="Supprimer"></td>
 							</form>
 						</tr>
 					}
 						<tr>
-							@form(routes.Application.createForum()) {
+							@form(routes.Administration.createForum()) {
 								<td></td>
 								<td><input type="text" class="form-control" name="name" id="name" placeholder="Nom du forum"></td>
 								<td><input type="text" class="form-control" name="description" id="description" placeholder="Description"></td>

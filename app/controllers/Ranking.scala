@@ -9,7 +9,7 @@ import org.jsoup._
 import models.ranking._
 import crawler._
 
-object Ranking extends Controller {
+object Ranking extends Utils {
   
   def test = Action {
     val document = Jsoup.connect("http://worldoflogs.com/guilds/203149/reports/3/").get
@@ -42,7 +42,7 @@ object Ranking extends Controller {
       case None => Nil
     }
     
-    Application.WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, Application.user))
+    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
   }
 
   def crawl = {

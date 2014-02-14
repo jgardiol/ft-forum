@@ -30,7 +30,7 @@
 					<tbody>
 					@users.map { u =>
 						<tr>
-							@form(routes.Application.updateUser(u.id)) {
+							@form(routes.Administration.updateUser(u.id)) {
 								<td>@u.id</td>
 								<td>@u.name</td>
 								<td><input type="text" class="form-control" name="main" id="main" value="@u.main"></td>

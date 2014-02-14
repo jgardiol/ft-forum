@@ -8,32 +8,7 @@ import scala.concurrent.Future
 
 import models._
 
-case class Paging(current: Int, numPages: Int)
-
-object Application extends Controller {
-
-  def user(implicit request: RequestHeader) = {
-    request.session.get("username") match {
-      case Some(name) => User.getByName(name)
-      case None => None
-    }
-  }
-  
-  def currentUri(implicit request: RequestHeader) = {
-    request.session.get("uri").getOrElse("/")
-  }
-  
-  def WithUri(content: play.api.templates.HtmlFormat.Appendable)(implicit request: RequestHeader) = {
-    request.session.get("username") match {
-      case Some(name) => Ok(content).withSession("uri" -> request.uri, "username" -> name)
-      case None => Ok(content).withSession("uri" -> request.uri)
-    }
-  }
-
-  val pageSize = 10
-
-  val unauthedAction = Redirect(routes.Application.index).flashing("error" -> "Vous n'avec pas le droit de faire cela.")
-
+object Application extends Utils {
   def index = Action { implicit request =>
     val forums = Forum.all() map { forum =>
       (forum, Forum.getInfo(forum.id))
@@ -114,112 +89,6 @@ object Application extends Controller {
 
   def logout = Action { implicit request =>
     Redirect(currentUri).withNewSession
-  }
-
-  def admin = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => WithUri(views.html.admin(User.all(), Some(user)))
-          case _ => Redirect(routes.Application.index).flashing("error" -> "Vous n'avez pas le droit d'accéder à cette ressource.")
-        }
-      }
-      case None => Redirect(routes.Application.index).flashing("error" -> "Vous n'avez pas le droit d'accéder à cette ressource.")
-    }
-  }
-
-  def forumadmin = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => WithUri(views.html.forumadmin(Forum.all(), Some(user)))
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
-  }
-
-  val forumForm = Form(tuple("name" -> nonEmptyText, "description" -> nonEmptyText))
-
-  def createForum = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            forumForm.bindFromRequest.fold(
-              formWithErrors => {
-                Redirect(routes.Application.forumadmin).flashing("error" -> "Formulaire incorrect.")
-              },
-              data => {
-                Forum.create(data._1, data._2)
-                Redirect(routes.Application.forumadmin).flashing("success" -> "Forum créé.")
-              })
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
-  }
-
-  def updateForum(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            forumForm.bindFromRequest.fold(
-              formWithErrors => {
-                Redirect(routes.Application.forumadmin).flashing("error" -> "Formulaire incorrect.")
-              },
-              data => {
-                Forum.update(id, data._1, data._2)
-                Redirect(routes.Application.forumadmin).flashing("success" -> "Forum bien mis à jour.")
-              })
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
-  }
-
-  def deleteForum(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            Forum.delete(id)
-            Redirect(routes.Application.forumadmin).flashing("success" -> "Forum supprimé.")
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
-  }
-
-  val userForm = Form(tuple("main" -> text, "role" -> text))
-
-  def updateUser(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            userForm.bindFromRequest.fold(
-              formWithErrors => {
-                Redirect(routes.Application.admin).flashing("error" -> "Formulaire incorrect.")
-              },
-              data => {
-                User.update(id, data._1, data._2)
-                Redirect(routes.Application.admin).flashing("success" -> "Utilisateur bien mis à jour.")
-              })
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
   }
 
   val newthreadForm = Form(

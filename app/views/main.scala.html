@@ -34,12 +34,11 @@
 					<li><a href="@routes.Ranking.rankings("Immerseus", "10H", "all")">Illidan Rankings</a></li>
 					@user.map { u =>
 						@if(u.role == "admin") {
-							<!-- <li><a href="@routes.Application.admin">Administration</a></li> -->
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
 								<ul class="dropdown-menu">
-									<li><a href="@routes.Application.admin">Utilisateurs</a></li>
-									<li><a href="@routes.Application.forumadmin">Forums</a></li>
+									<li><a href="@routes.Administration.admin">Utilisateurs</a></li>
+									<li><a href="@routes.Administration.forumadmin">Forums</a></li>
 								</ul>
 							</li>
 						}
