@@ -167,6 +167,7 @@ object Crawler {
       case e: HttpStatusException => CrawlError.create(e.getMessage(), Illidan_URL)
       case e: java.net.SocketTimeoutException => CrawlError.create(e.getMessage(), Illidan_URL)
       case e: java.io.IOException => CrawlError.create(e.getMessage(), Illidan_URL)
+      case e: Throwable => Logger.error("Fatal exception...")
     }
   }
 
