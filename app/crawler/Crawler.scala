@@ -6,6 +6,7 @@ import play.api._
 import java.text.SimpleDateFormat
 import scala.collection.JavaConversions.asScalaBuffer
 import java.net.MalformedURLException
+import java.text.ParseException
 
 object Crawler {
   case class Boss(name: String, difficulty: String)
@@ -50,14 +51,18 @@ object Crawler {
     for (row <- rows) {
       val cells = row.select("td")
       if (!cells.isEmpty && cells.size() > 1) {
-        val date = format.parse(cells.first().text())
-        val id = cells.get(3).select("a").attr("href").split("/").last
-        val zone = cells.get(3).select("a").text()
-        val isExpired = cells.get(8).select("td").attr("class") == "expexpired2"
+        try {
+          val date = format.parse(cells.first().text())
+          val id = cells.get(3).select("a").attr("href").split("/").last
+          val zone = cells.get(3).select("a").text()
+          val isExpired = cells.get(8).select("td").attr("class") == "expexpired2"
 
-        // Only store reports for relevant raids
-        if (zone.contains(SoO) && !isExpired && date.after(since)) {
-          result = Report(id, date) :: result
+          // Only store reports for relevant raids
+          if (zone.contains(SoO) && !isExpired && date.after(since)) {
+            result = Report(id, date) :: result
+          }
+        } catch {
+          case e: ParseException => Logger.error("Date format exception: " + e.getMessage())
         }
       }
     }
@@ -146,7 +151,7 @@ object Crawler {
         // Add an entry to the db. Date is set to 1970 to ensure we get all reports.
         models.ranking.Guild.create(guild.name, guild.guildId, new java.util.Date(0L))
         val g = models.ranking.Guild.getByWolId(guild.guildId).get
-        
+
         // Crawl reports
         val guildUrl = Guild_URL.replaceAll("GUILD_ID", guild.guildId)
         try {
@@ -158,7 +163,7 @@ object Crawler {
         } catch {
           case e: HttpStatusException => // Expected.
         }
-        
+
         models.ranking.Guild.update(models.ranking.Guild(g.id, g.name, g.wolId, new java.util.Date))
 
         Thread.sleep(10000L)
