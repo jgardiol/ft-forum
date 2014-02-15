@@ -84,17 +84,16 @@ object Report {
   }
 
   // Returns all reports for a given player on a given boss
-  def getReports(boss: Boss, playerName: String, spec: String): List[Report] = {
+  def getReports(boss: Boss, playerName: String): List[Report] = {
     DB.withConnection { implicit c =>
       SQL("""
           SELECT * 
           FROM dps 
-          WHERE boss_id={boss_id} AND player_name={player_name} AND spec={spec}
-          ORDER BY dps DESC
+          WHERE boss_id={boss_id} AND player_name={player_name}
+          ORDER BY value DESC
           """).on(
         'boss_id -> boss.id,
-        'player_name -> playerName,
-        'spec -> spec).as(simple *)
+        'player_name -> playerName).as(simple *)
     } map { el =>
       Report(playerName, el.spec, el.value, boss, el.reportId)
     }
@@ -204,6 +203,12 @@ object Guild {
       SQL("UPDATE guilds SET last_report={last_report} WHERE id={id}").on(
         'last_report -> guild.lastReport,
         'id -> guild.id).executeUpdate()
+    }
+  }
+  
+  def getByWolId(id: String): Option[Guild] = {
+    DB.withConnection { implicit c =>
+      SQL("SELECT * FROM guilds WHERE wol_id={id}").on('id -> id).as(simple.singleOpt)
     }
   }
 

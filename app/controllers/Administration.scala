@@ -5,10 +5,13 @@ import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
 import scala.concurrent.Future
-
 import models._
+import views.html.defaultpages.unauthorized
+import crawler.CrawlError
 
 object Administration extends Utils {
+
+  var isCrawling = false
 
   def admin = Action { implicit request =>
     user match {
@@ -111,6 +114,85 @@ object Administration extends Utils {
           }
           case _ => unauthedAction
         }
+      }
+      case None => unauthedAction
+    }
+  }
+
+  def ranking = Action { implicit request =>
+    user match {
+      case Some(user) => user.role match {
+        case "admin" => {
+          WithUri(views.html.ranking.rankingadmin(crawler.CrawlError.all(), isCrawling, Some(user)))
+        }
+        case _ => unauthedAction
+      }
+      case None => unauthedAction
+    }
+  }
+
+  def parseReport(id: Long, url: String) = Action { implicit request =>
+    import play.api.libs.concurrent.Execution.Implicits._
+    import crawler._
+    
+    val pattern = """^http://worldoflogs.com/reports/(.*)""".r
+    val pattern(suffix) = url
+    
+    val wolId: String = suffix.split("/").head
+
+    user match {
+      case Some(user) => user.role match {
+        case "admin" => {
+          if (!isCrawling) {
+            isCrawling = true
+            
+            val f = scala.concurrent.Future {
+              Crawler.processReport(Crawler.Report(wolId, new java.util.Date))
+            }
+
+            f onComplete {
+              case _ => {
+                CrawlError.delete(id)
+                isCrawling = false
+              }
+            }
+            Redirect(currentUri).flashing("success" -> "Crawl started")
+          } else {
+            Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
+          }
+
+        }
+        case _ => unauthedAction
+      }
+      case None => unauthedAction
+    }
+  }
+
+  def startCrawl = Action { implicit request =>
+    import play.api.libs.concurrent.Execution.Implicits._
+    import crawler._
+
+    user match {
+      case Some(user) => user.role match {
+        case "admin" => {
+          if (!isCrawling) {
+            isCrawling = true
+            
+            val f = scala.concurrent.Future { Crawler.crawl }
+            
+            f onComplete {
+              case _ => {
+                Logger.info("crawling finished")
+                isCrawling = false
+              }
+            }
+            Redirect(currentUri).flashing("success" -> "Crawl started")
+          } else {
+            Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
+          }
+
+        }
+        case _ => unauthedAction
       }
       case None => unauthedAction
     }

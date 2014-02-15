@@ -1,0 +1,61 @@
+@(errors: List[crawler.CrawlError], isCrawling: Boolean, user: Option[User])(implicit flash: Flash)
+
+@main("Ranking Administration", user) {
+
+	<div class="container">	
+		@flashmessage(flash)
+	
+		<div class="thread-header">
+			<div class="row">
+				<div class="col-md-12">
+					<h3>Administration - Ranking</h3>
+					<p>
+					@if(isCrawling) {
+						A crawl is currently in progress
+					} else {
+					<form method="POST" action="@routes.Administration.startCrawl">
+						<input type="submit" class="btn btn-danger" value="Start Crawling">
+					</form>
+					}
+					</p>
+				</div>
+			</div>
+		</div>
+		
+		<div>
+			<div>
+				<h4>Errors</h4>
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Message</th>
+							<th>Url</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+					@errors.map { e =>
+						<tr>
+							<td>@e.id</td>
+							<td>@e.message</td>
+							<td><a href="@e.url" target="_blank">@e.url</a></td>
+							@if(!isCrawling) {
+							<td>
+							<form method="POST" action="@routes.Administration.parseReport(e.id, e.url)">
+								<input type="submit" class="btn btn-success" value="Reparse">
+							</form>
+							</td>
+							} else {
+							<td></td>
+							}
+							
+						</tr>
+					}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+}

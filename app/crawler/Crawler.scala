@@ -5,6 +5,7 @@ import scala.collection.mutable
 import play.api._
 import java.text.SimpleDateFormat
 import scala.collection.JavaConversions.asScalaBuffer
+import java.net.MalformedURLException
 
 object Crawler {
   case class Boss(name: String, difficulty: String)
@@ -35,7 +36,7 @@ object Crawler {
     result
   }
 
-  def getReports(doc: org.jsoup.nodes.Document): List[Report] = {
+  def getReports(doc: org.jsoup.nodes.Document, since: java.util.Date): List[Report] = {
     val rows = doc.select("#reportTable").first().select("tr")
 
     // 1st td contains date, 4th td contains report url
@@ -49,14 +50,14 @@ object Crawler {
     for (row <- rows) {
       val cells = row.select("td")
       if (!cells.isEmpty && cells.size() > 1) {
-        val date = cells.first().text()
+        val date = format.parse(cells.first().text())
         val id = cells.get(3).select("a").attr("href").split("/").last
         val zone = cells.get(3).select("a").text()
         val isExpired = cells.get(8).select("td").attr("class") == "expexpired2"
 
         // Only store reports for relevant raids
-        if (zone.contains(SoO) && !isExpired) {
-          result = Report(id, format.parse(date)) :: result
+        if (zone.contains(SoO) && !isExpired && date.after(since)) {
+          result = Report(id, date) :: result
         }
       }
     }
@@ -132,6 +133,72 @@ object Crawler {
 
     result
   }
+
+  def crawl = {
+
+    try {
+      // Crawl list of guilds
+      val illidanDoc = Jsoup.connect(Illidan_URL).get
+      val guilds = getGuilds(illidanDoc)
+
+      // For each guild, crawl reports
+      for (guild <- guilds) {
+        // Add an entry to the db. Date is set to 1970 to ensure we get all reports.
+        models.ranking.Guild.create(guild.name, guild.guildId, new java.util.Date(0L))
+        val g = models.ranking.Guild.getByWolId(guild.guildId).get
+        
+        // Crawl reports
+        val guildUrl = Guild_URL.replaceAll("GUILD_ID", guild.guildId)
+        try {
+          for (i <- 1 to 10) {
+            val guildDoc = Jsoup.connect(guildUrl + i).get
+            val reports = getReports(guildDoc, g.lastReport)
+            processReports(reports)
+          }
+        } catch {
+          case e: HttpStatusException => // Expected.
+        }
+        
+        models.ranking.Guild.update(models.ranking.Guild(g.id, g.name, g.wolId, new java.util.Date))
+
+        Thread.sleep(10000L)
+      }
+    } catch {
+      case e: HttpStatusException => CrawlError.create(e.getMessage(), Illidan_URL)
+      case e: java.net.SocketTimeoutException => CrawlError.create(e.getMessage(), Illidan_URL)
+      case e: java.io.IOException => CrawlError.create(e.getMessage(), Illidan_URL)
+    }
+  }
+
+  def processReports(reports: List[Report]) {
+    for (report <- reports) {
+      processReport(report)
+      Thread.sleep(10000L)
+    }
+  }
+
+  def processReport(report: Report) {
+    val reportUrl = RankInfo_URL.replaceAll("REPORT_ID", report.reportId)
+
+    try {
+      val reportDoc = Jsoup.connect(reportUrl).get
+      val bosses = getBosses(reportDoc)
+      val dps = getDps(reportDoc, bosses)
+
+      for (player <- dps) {
+        for (boss <- player.dps) {
+          models.ranking.Boss.getByName(boss._1.name, boss._1.difficulty) match {
+            case Some(b) => models.ranking.Report.create(boss._2, player.spec, report.reportId, player.name, b.id)
+            case None =>
+          }
+        }
+      }
+    } catch {
+      case e: HttpStatusException => CrawlError.create(e.getMessage(), reportUrl)
+      case e: java.net.SocketTimeoutException => CrawlError.create(e.getMessage(), reportUrl)
+      case e: java.io.IOException => CrawlError.create(e.getMessage(), reportUrl)
+    }
+  }
 }
 
 case class CrawlError(id: Long, message: String, url: String)
@@ -158,12 +225,12 @@ object CrawlError {
 
   def create(message: String, url: String) {
     DB.withConnection { implicit c =>
-      SQL("INSERT INTO crawl_errors(message, url) VALUES {message}, {url}").on(
+      SQL("INSERT INTO crawl_errors(message, url) VALUES ({message}, {url})").on(
         'message -> message,
         'url -> url).executeUpdate()
     }
   }
-  
+
   def delete(id: Long) {
     DB.withConnection { implicit c =>
       SQL("DELETE FROM crawl_errors WHERE id={id}").on('id -> id).executeUpdate()

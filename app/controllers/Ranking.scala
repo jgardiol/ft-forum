@@ -10,24 +10,6 @@ import models.ranking._
 import crawler._
 
 object Ranking extends Utils {
-  
-  def test = Action {
-    val document = Jsoup.connect("http://worldoflogs.com/guilds/203149/reports/3/").get
-    val reports = Crawler.getReports(document)
-    
-    reports.foreach(r => Logger.info("Report: " + r.date + ", " + r.reportId))
-    NotFound
-  }
-
-  def startJob = Action {
-    import play.api.libs.concurrent.Execution.Implicits._
-
-    Logger.info("About to start crawling")
-    scala.concurrent.Future { crawl }
-    Logger.info("Crawler started")
-
-    Ok
-  }
 
   def rankings(boss: String, difficulty: String, spec: String) = Action { implicit request =>
     val b = Boss.getByName(boss, difficulty)
@@ -44,60 +26,15 @@ object Ranking extends Utils {
     
     WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
   }
-
-  def crawl = {
-    try {
-      // Crawl list of guilds
-      val illidanDoc = Jsoup.connect(Crawler.Illidan_URL).get
-      val guilds = Crawler.getGuilds(illidanDoc)
-
-      // For each guild, crawl reports
-      for (guild <- guilds) {
-        // Add an entry to the db.
-        Guild.create(guild.name, guild.guildId, new java.util.Date())
-
-        // Crawl reports
-        val guildUrl = Crawler.Guild_URL.replaceAll("GUILD_ID", guild.guildId)
-        try {
-          for (i <- 1 to 10) {
-            val guildDoc = Jsoup.connect(guildUrl + i).get
-            val reports = Crawler.getReports(guildDoc)
-            processReports(reports)
-          }
-        } catch {
-          case e: Throwable =>
-        }
-
-        Logger.info("Finished crawling " + guild.name)
-        Thread.sleep(10000L)
-      }
-    } catch {
-      case e: Throwable => Logger.info("Exception while crawling")
+  
+  def player(name: String, boss: String, difficulty: String, spec: String) = Action { implicit request =>
+    val b = Boss.getByName(boss, difficulty)
+    val reports = Boss.getByName(boss, difficulty) match {
+      case Some(boss) => Report.getReports(boss, name)
+      case None => Nil
     }
-  }
-
-  def processReports(reports: List[crawler.Crawler.Report]) {
-
-    for (report <- reports) {
-      val reportUrl = Crawler.RankInfo_URL.replaceAll("REPORT_ID", report.reportId)
-
-      try {
-        val reportDoc = Jsoup.connect(reportUrl).get
-        val bosses = Crawler.getBosses(reportDoc)
-        val dps = Crawler.getDps(reportDoc, bosses)
-
-        for (player <- dps) {
-          for (boss <- player.dps) {
-            Report.create(boss._2, player.spec, report.reportId, player.name, Boss.getByName(boss._1.name, boss._1.difficulty).get.id)
-          }
-        }
-      } catch {
-        case e: Throwable => Logger.error(e.getMessage())
-      }
-
-      Logger.info("Finished parsing " + reportUrl)
-      Thread.sleep(10000L)
-    }
+    
+    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
   }
 
   val reportUrl = "http://worldoflogs.com/reports/REPORT_ID/"
@@ -154,5 +91,5 @@ object Ranking extends Utils {
     "Mistweaver 1102" -> "Monk",
     "Windwalker 1103" -> "Monk")
 
-  val difficulties = List("10N", "25N", "10H", "25H")
+  val difficulties = List("10N", "25N", "10H", "25H", "25L")
 }

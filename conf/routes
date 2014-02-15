@@ -22,6 +22,10 @@ POST	/forum/:id/upate			controllers.Administration.updateForum(id: Long)
 POST	/forum/:id/delete			controllers.Administration.deleteForum(id: Long)
 POST	/forum/create				controllers.Administration.createForum
 
+GET		/admin/ranking				controllers.Administration.ranking
+POST	/admin/startCrawl			controllers.Administration.startCrawl
+POST	/admin/parseReport/:id/:url	controllers.Administration.parseReport(id: Long, url: String)
+
 
 # Authentication
 GET		/logout						controllers.Application.logout
@@ -29,13 +33,12 @@ POST	/login						controllers.Application.login
 POST	/signup						controllers.Application.signup
 
 # Ranking
-GET		/crawl								controllers.Ranking.startJob
-GET		/test								controllers.Ranking.test
-
 GET		/rankings							controllers.Ranking.rankings(boss: String = "Immerseus", difficulty: String = "10H", spec: String = "all")
 GET		/rankings/:boss/:difficulty			controllers.Ranking.rankings(boss: String, difficulty: String, spec: String = "all")
 GET		/rankings/:boss/:difficulty/:spec	controllers.Ranking.rankings(boss: String, difficulty: String, spec: String)
 
+GET		/player/:name						controllers.Ranking.player(name: String, boss: String = "Immerseus", difficulty: String = "10H", spec: String = "all")
+GET		/player/:name/:boss/:difficulty/:spec		controllers.Ranking.player(name: String, boss: String, difficulty: String, spec: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

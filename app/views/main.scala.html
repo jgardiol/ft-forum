@@ -29,8 +29,8 @@
 			<nav class="navbar navbar-default" role="navigation">
 				<a class="navbar-brand" href="@routes.Application.index">Frozen Tears</a>
 				<ul class="nav navbar-nav">
-					<li><a href="http://worldoflogs.com/guilds/203149/">World of Logs</a></li>
-					<li><a href="http://www.wowprogress.com/guild/eu/illidan/Frozen+Tears/">Wowprogress</a></li>
+					<li><a href="http://worldoflogs.com/guilds/203149/" target="_blank">World of Logs</a></li>
+					<li><a href="http://www.wowprogress.com/guild/eu/illidan/Frozen+Tears/" target="_blank">Wowprogress</a></li>
 					<li><a href="@routes.Ranking.rankings("Immerseus", "10H", "all")">Illidan Rankings</a></li>
 					@user.map { u =>
 						@if(u.role == "admin") {
@@ -39,6 +39,7 @@
 								<ul class="dropdown-menu">
 									<li><a href="@routes.Administration.admin">Utilisateurs</a></li>
 									<li><a href="@routes.Administration.forumadmin">Forums</a></li>
+									<li><a href="@routes.Administration.ranking">Ranking</a></li>
 								</ul>
 							</li>
 						}
