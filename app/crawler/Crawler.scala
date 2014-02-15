@@ -94,7 +94,9 @@ object Crawler {
           else
             cells.get(7).text()
 
-          temp = (boss, playername, spec, dps) :: temp
+          // Check if spec is valid before adding the record
+          if (controllers.Ranking.specs.contains(spec))
+            temp = (boss, playername, spec, dps) :: temp
         }
       }
     }
