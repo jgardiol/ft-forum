@@ -62,7 +62,7 @@ object Crawler {
             result = Report(id, date) :: result
           }
         } catch {
-          case e: ParseException => Logger.error("Date format exception: " + e.getMessage())
+          case e: ParseException => // Nothing to do...
         }
       }
     }
@@ -189,7 +189,7 @@ object Crawler {
     val reportUrl = RankInfo_URL.replaceAll("REPORT_ID", report.reportId)
 
     try {
-      val reportDoc = Jsoup.connect(reportUrl).get
+      val reportDoc = Jsoup.connect(reportUrl).timeout(10000).get
       val bosses = getBosses(reportDoc)
       val dps = getDps(reportDoc, bosses)
 
