@@ -103,7 +103,7 @@ object Report {
   def getBestReport(boss: Boss, playerName: String, spec: String): Option[Report] = {
     DB.withConnection { implicit c =>
       SQL("""
-		  SELECT d.*
+		  SELECT DISTINCT ON(d.value) d.*
 		  FROM dps d
 		  INNER JOIN
 		  (
@@ -126,7 +126,7 @@ object Report {
   def getBestReports(boss: Boss, limit: Int): List[Report] = {
     DB.withConnection { implicit c =>
       SQL("""
-        		SELECT d.*
+        		SELECT DISTINCT ON(d.value) d.*
         		FROM dps d
         		INNER JOIN
         		(
@@ -150,7 +150,7 @@ object Report {
   def getBestReports(boss: Boss, limit: Int, spec: String): List[Report] = {
     DB.withConnection { implicit c =>
       SQL("""
-        		SELECT d.*
+        		SELECT DISTINCT ON(d.value) d.*
         		FROM dps d
         		INNER JOIN
         		(
