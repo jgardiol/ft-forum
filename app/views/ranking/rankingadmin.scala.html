@@ -10,10 +10,11 @@
 				<div class="col-md-12">
 					<h3>Administration - Ranking</h3>
 					<p id="crawl_buttons">
-						<form method="POST" action="@controllers.Administration.startCrawl">
+						<form method="POST" action="@routes.Administration.startCrawl">
 							<input type="submit" class="btn btn-danger" value="Start crawling">
 						</form>
-						<form method="POST" action="@controllers.Administration.crawlErrors">
+						<br/>
+						<form method="POST" action="@routes.Administration.crawlErrors">
 							<input type="submit" class="btn btn-danger" value="Recrawl errors">
 						</form>
 					</p>
