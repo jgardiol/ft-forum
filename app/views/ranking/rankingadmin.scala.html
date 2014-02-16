@@ -53,7 +53,11 @@
 							<td></td>
 							}
 							*@
-							<td id="status_cell"></td>
+							<td class="status_cell">
+								<form method="POST" action="@routes.Administration.parseReport(e.id, e.url)">
+									<input type="submit" class="btn btn-success" value="Reparse">
+								</form>
+							</td>
 							
 						</tr>
 					}
@@ -66,11 +70,11 @@
 	<script type="text/javascript">
 		var stillCrawling = function(status) {
 			if(status === "false") {
-				$("#status").html('<form method="POST" action="@routes.Administration.startCrawl"><input type="submit" class="btn btn-danger" value="Start Crawling"></form>')
-				$("#status_cell").html('<form method="POST" action="@routes.Administration.parseReport(e.id, e.url)"><input type="submit" class="btn btn-success" value="Reparse"></form>')
+				$("#status").html('<form method="POST" action="@routes.Administration.startCrawl"><input type="submit" class="btn btn-danger" value="Start Crawling"></form>');
+				$(".status_cell").show();
 			} else {
-				$("#status").html('A crawl is currently in progress')
-				$("#status_cell").html('')
+				$("#status").html('A crawl is currently in progress');
+				$(".status_cell").hide();
 			}
 		}
 	</script>
