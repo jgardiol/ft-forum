@@ -107,7 +107,7 @@ object Report {
 		  FROM dps d
 		  INNER JOIN
 		  (
-		      SELECT MAX(value) AS value, player_name, boss_id, spec
+		      SELECT DISTINCT MAX(value) AS value, player_name, boss_id, spec
 		      FROM dps
 		      WHERE player_name={player_name} AND spec={spec}
 		      GROUP BY player_name, boss_id, spec
@@ -130,11 +130,10 @@ object Report {
         		FROM dps d
         		INNER JOIN
         		(
-        		    SELECT MAX(value) AS value, player_name, spec
+        		    SELECT DISTINCT MAX(value) AS value, player_name, spec
         		    FROM dps
         		    WHERE boss_id={boss_id}
         		    GROUP BY player_name, spec
-    		  		LIMIT 1
         		) temp ON d.player_name=temp.player_name AND d.spec=temp.spec AND d.value=temp.value
         		WHERE d.boss_id={boss_id}
         		ORDER BY value DESC
@@ -155,7 +154,7 @@ object Report {
         		FROM dps d
         		INNER JOIN
         		(
-        		    SELECT MAX(value) AS value, player_name, spec
+        		    SELECT DISTINCT MAX(value) AS value, player_name, spec
         		    FROM dps
         		    WHERE boss_id={boss_id}
         		    GROUP BY player_name, spec
