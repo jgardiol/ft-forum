@@ -22,11 +22,12 @@ POST	/forum/:id/upate			controllers.Administration.updateForum(id: Long)
 POST	/forum/:id/delete			controllers.Administration.deleteForum(id: Long)
 POST	/forum/create				controllers.Administration.createForum
 
-GET		/admin/ranking				controllers.Administration.ranking
-POST	/admin/startCrawl			controllers.Administration.startCrawl
-POST	/admin/parseReport/:id/:url	controllers.Administration.parseReport(id: Long, url: String)
+GET		/admin/ranking					controllers.Administration.ranking
+POST	/admin/startCrawl				controllers.Administration.startCrawl
+POST	/admin/crawlErrors				controllers.Administration.crawlErrors
+POST	/admin/crawlerror/delete/:id	controllers.Administration.deleteError(id: Long)
 
-GET		/admin/crawlStatus			controllers.Administration.crawlStatus
+GET		/admin/crawlStatus				controllers.Administration.crawlStatus
 
 
 # Authentication

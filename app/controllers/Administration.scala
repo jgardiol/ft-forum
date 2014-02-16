@@ -7,10 +7,11 @@ import play.api.data.Forms._
 import play.api.libs.concurrent._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
-import crawler.CrawlError
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.Comet
+
 import models._
+import crawler._
 
 object Administration extends Utils {
 
@@ -126,7 +127,7 @@ object Administration extends Utils {
     user match {
       case Some(user) => user.role match {
         case "admin" => {
-          WithUri(views.html.ranking.rankingadmin(crawler.CrawlError.all(), Some(user)))
+          WithUri(views.html.ranking.rankingadmin(CrawlError.all(), Some(user)))
         }
         case _ => unauthedAction
       }
@@ -146,14 +147,9 @@ object Administration extends Utils {
     }
   }
 
-  def parseReport(id: Long, url: String) = Action { implicit request =>
+  def crawlErrors = Action { implicit request =>
     import play.api.libs.concurrent.Execution.Implicits._
     import crawler._
-
-    val pattern = """^http://worldoflogs.com/reports/(.*)""".r
-    val pattern(suffix) = url
-
-    val wolId: String = suffix.split("/").head
 
     user match {
       case Some(user) => user.role match {
@@ -162,12 +158,12 @@ object Administration extends Utils {
             isCrawling = true
 
             val f = scala.concurrent.Future {
-              Crawler.processReport(Crawler.Report(wolId, new java.util.Date))
+              Crawler.processErrors
             }
 
             f onComplete {
               case _ => {
-                CrawlError.delete(id)
+                Logger.info("Finished processing errors")
                 isCrawling = false
               }
             }
@@ -206,6 +202,19 @@ object Administration extends Utils {
             Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
           }
 
+        }
+        case _ => unauthedAction
+      }
+      case None => unauthedAction
+    }
+  }
+  
+  def deleteError(id: Long) = Action { implicit request =>
+    user match {
+      case Some(user) => user.role match {
+        case "admin" => {
+        	CrawlError.delete(id)
+            Redirect(currentUri).flashing("success" -> ("Error " + id + " deleted."))
         }
         case _ => unauthedAction
       }

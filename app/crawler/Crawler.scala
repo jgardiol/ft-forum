@@ -207,6 +207,22 @@ object Crawler {
       case e: java.io.IOException => CrawlError.create(e.getMessage(), reportUrl)
     }
   }
+
+  def processErrors() {
+    val errors = CrawlError.all()
+
+    val pattern = """^http://worldoflogs.com/reports/(.*)""".r
+
+    for (error <- errors) {
+      // Extract wolId from report url
+      val pattern(suffix) = error.url
+      val wolId: String = suffix.split("/").head
+      
+      processReport(Report(wolId, new java.util.Date()))
+      CrawlError.delete(error.id)
+    }
+
+  }
 }
 
 case class CrawlError(id: Long, message: String, url: String)

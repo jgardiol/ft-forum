@@ -9,10 +9,16 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h3>Administration - Ranking</h3>
-					<p id="status">
-						<form method="POST" action="@routes.Administration.startCrawl">
-							<input type="submit" class="btn btn-danger" value="Start Crawling">
+					<p id="crawl_buttons">
+						<form method="POST" action="@controllers.Administration.startCrawl">
+							<input type="submit" class="btn btn-danger" value="Start crawling">
 						</form>
+						<form method="POST" action="@controllers.Administration.crawlErrors">
+							<input type="submit" class="btn btn-danger" value="Recrawl errors">
+						</form>
+					</p>
+					<p id="crawl_text">
+						A crawl is already in progress...
 					</p>
 				</div>
 			</div>
@@ -36,12 +42,11 @@
 							<td>@e.id</td>
 							<td>@e.message</td>
 							<td><a href="@e.url" target="_blank">@e.url</a></td>
-							<td class="status_cell">
-								<form method="POST" action="@routes.Administration.parseReport(e.id, e.url)">
-									<input type="submit" class="btn btn-success" value="Reparse">
+							<td>
+								<form method="POST" action="@routes.Administration.deleteErrror(e.id)">
+									<input type="submit" class="btn btn-success" value="Delete">
 								</form>
 							</td>
-							
 						</tr>
 					}
 					</tbody>
@@ -53,11 +58,11 @@
 	<script type="text/javascript">
 		var stillCrawling = function(status) {
 			if(status === "false") {
-				$("#status").html('<form method="POST" action="@routes.Administration.startCrawl"><input type="submit" class="btn btn-danger" value="Start Crawling"></form>');
-				$(".status_cell").show();
+				$("#crawl_buttons").hide()
+				$("#crawl_text").show()
 			} else {
-				$("#status").html('A crawl is currently in progress');
-				$(".status_cell").hide();
+				$("#crawl_buttons").show()
+				$("#crawl_text").hide()
 			}
 		}
 	</script>
