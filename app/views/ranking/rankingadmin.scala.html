@@ -9,7 +9,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h3>Administration - Ranking</h3>
-					<p id="crawl_buttons">
+					<div id="crawl_buttons">
 						<form method="POST" action="@routes.Administration.startCrawl">
 							<input type="submit" class="btn btn-danger" value="Start crawling">
 						</form>
@@ -17,7 +17,7 @@
 						<form method="POST" action="@routes.Administration.crawlErrors">
 							<input type="submit" class="btn btn-danger" value="Recrawl errors">
 						</form>
-					</p>
+					</div>
 					<p id="crawl_text">
 						A crawl is already in progress...
 					</p>
@@ -59,11 +59,11 @@
 	<script type="text/javascript">
 		var stillCrawling = function(status) {
 			if(status === "false") {
-				$("#crawl_buttons").hide()
-				$("#crawl_text").show()
-			} else {
 				$("#crawl_buttons").show()
 				$("#crawl_text").hide()
+			} else {
+				$("#crawl_buttons").hide()
+				$("#crawl_text").show()
 			}
 		}
 	</script>

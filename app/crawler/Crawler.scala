@@ -220,6 +220,7 @@ object Crawler {
       
       processReport(Report(wolId, new java.util.Date()))
       CrawlError.delete(error.id)
+      Thread.sleep(10000L)
     }
 
   }
