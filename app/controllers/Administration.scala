@@ -4,10 +4,13 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.libs.concurrent._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
-import models._
-import views.html.defaultpages.unauthorized
 import crawler.CrawlError
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.Comet
+import models._
 
 object Administration extends Utils {
 
@@ -123,7 +126,7 @@ object Administration extends Utils {
     user match {
       case Some(user) => user.role match {
         case "admin" => {
-          WithUri(views.html.ranking.rankingadmin(crawler.CrawlError.all(), isCrawling, Some(user)))
+          WithUri(views.html.ranking.rankingadmin(crawler.CrawlError.all(), Some(user)))
         }
         case _ => unauthedAction
       }
@@ -131,13 +134,25 @@ object Administration extends Utils {
     }
   }
 
+  def crawlStatus = Action {
+    Ok.chunked(stillCrawling &> Comet(callback = "parent.stillCrawling"))
+  }
+
+  lazy val stillCrawling: Enumerator[String] = {
+    import scala.concurrent.duration._
+
+    Enumerator.generateM {
+      Promise.timeout(Some(isCrawling.toString), 100 milliseconds)
+    }
+  }
+
   def parseReport(id: Long, url: String) = Action { implicit request =>
     import play.api.libs.concurrent.Execution.Implicits._
     import crawler._
-    
+
     val pattern = """^http://worldoflogs.com/reports/(.*)""".r
     val pattern(suffix) = url
-    
+
     val wolId: String = suffix.split("/").head
 
     user match {
@@ -145,7 +160,7 @@ object Administration extends Utils {
         case "admin" => {
           if (!isCrawling) {
             isCrawling = true
-            
+
             val f = scala.concurrent.Future {
               Crawler.processReport(Crawler.Report(wolId, new java.util.Date))
             }
@@ -177,9 +192,9 @@ object Administration extends Utils {
         case "admin" => {
           if (!isCrawling) {
             isCrawling = true
-            
+
             val f = scala.concurrent.Future { Crawler.crawl }
-            
+
             f onComplete {
               case _ => {
                 Logger.info("crawling finished")

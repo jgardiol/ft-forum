@@ -26,6 +26,8 @@ GET		/admin/ranking				controllers.Administration.ranking
 POST	/admin/startCrawl			controllers.Administration.startCrawl
 POST	/admin/parseReport/:id/:url	controllers.Administration.parseReport(id: Long, url: String)
 
+GET		/admin/crawlStatus			controllers.Administration.crawlStatus
+
 
 # Authentication
 GET		/logout						controllers.Application.logout
