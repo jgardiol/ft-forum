@@ -111,7 +111,6 @@ object Report {
 		      FROM dps
 		      WHERE player_name={player_name} AND spec={spec}
 		      GROUP BY player_name, boss_id, spec
-    		  LIMIT 1
 		  ) temp ON d.player_name=temp.player_name AND d.value=temp.value
 		  WHERE d.boss_id={boss_id} AND d.player_name={player_name} AND d.spec={spec}
     	""").on(
@@ -135,6 +134,7 @@ object Report {
         		    FROM dps
         		    WHERE boss_id={boss_id}
         		    GROUP BY player_name, spec
+    		  		LIMIT 1
         		) temp ON d.player_name=temp.player_name AND d.spec=temp.spec AND d.value=temp.value
         		WHERE d.boss_id={boss_id}
         		ORDER BY value DESC
