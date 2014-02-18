@@ -8,7 +8,7 @@ import anorm.SqlParser._
 
 import org.mindrot.jbcrypt.BCrypt
 
-case class User(id: Long, name: String, password: String, main: String, role: String)
+case class User(id: Long, name: String, password: String, main: String, roleId: Long)
 
 object User {
   val simple = {
@@ -16,10 +16,12 @@ object User {
       get[String]("name") ~
       get[String]("password") ~
       get[String]("main") ~
-      get[String]("role") map {
-        case id ~ name ~ password ~ main ~ role => User(id, name, password, main, role)
+      get[Long]("roleId") map {
+        case id ~ name ~ password ~ main ~ roleId => User(id, name, password, main, roleId)
       }
   }
+  
+  val Guest = User(-1, "Guest", "", "", Role.Guest.id)
 
   def all(): List[User] = {
     DB.withConnection { implicit c =>
@@ -41,7 +43,7 @@ object User {
   }
 
   // Adds a user to the database
-  def create(name: String, password: String, main: String, role: String): Option[User] = {
+  def create(name: String, password: String, main: String): Option[User] = {
     // Check if username is available
     getByName(name) match {
       case Some(user) => None
@@ -49,24 +51,24 @@ object User {
         val hashed = BCrypt.hashpw(password, BCrypt.gensalt())
 
         DB.withConnection { implicit c =>
-          SQL("INSERT INTO users(name, password, main, role) VALUES({name}, {password}, {main}, {role})").on(
+          SQL("INSERT INTO users(name, password, main) VALUES({name}, {password}, {main})").on(
             'name -> name,
             'password -> hashed,
-            'main -> main,
-            'role -> role).executeUpdate()
+            'main -> main).executeUpdate()
         }
 
         getByName(name)
       }
     }
   }
+  
 
-  def update(id: Long, main: String, role: String) = {
+  def update(id: Long, main: String, role: Role) = {
     DB.withConnection { implicit c =>
-      SQL("UPDATE users SET main={main}, role={role} WHERE id={id}").on(
+      SQL("UPDATE users SET main={main}, role_id={role_id} WHERE id={id}").on(
         'id -> id,
         'main -> main,
-        'role -> role).executeUpdate()
+        'role_id -> role.id).executeUpdate()
     }
   }
 

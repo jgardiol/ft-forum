@@ -11,7 +11,7 @@ import crawler._
 
 object Ranking extends Utils {
 
-  def rankings(boss: String, difficulty: String, spec: String) = Action { implicit request =>
+  def rankings(boss: String, difficulty: String, spec: String) = IsAuthenticated { user => implicit request =>
     val b = Boss.getByName(boss, difficulty)
     val reports = Boss.getByName(boss, difficulty) match {
       case Some(boss) => {
@@ -24,17 +24,17 @@ object Ranking extends Utils {
       case None => Nil
     }
     
-    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
+    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, Some(user)))
   }
   
-  def player(name: String, boss: String, difficulty: String, spec: String) = Action { implicit request =>
+  def player(name: String, boss: String, difficulty: String, spec: String) = IsAuthenticated { user => implicit request =>
     val b = Boss.getByName(boss, difficulty)
     val reports = Boss.getByName(boss, difficulty) match {
       case Some(boss) => Report.getReports(boss, name)
       case None => Nil
     }
     
-    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
+    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, Some(user)))
   }
 
   val reportUrl = "http://worldoflogs.com/reports/REPORT_ID/"

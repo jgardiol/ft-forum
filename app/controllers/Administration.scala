@@ -17,122 +17,65 @@ object Administration extends Utils {
 
   var isCrawling = false
 
-  def admin = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => WithUri(views.html.admin(User.all(), Some(user)))
-          case _ => Redirect(routes.Application.index).flashing("error" -> "Vous n'avez pas le droit d'accéder à cette ressource.")
-        }
-      }
-      case None => Redirect(routes.Application.index).flashing("error" -> "Vous n'avez pas le droit d'accéder à cette ressource.")
-    }
+  def admin = AdminAction { user =>
+    implicit request =>
+      WithUri(views.html.admin(User.all(), Some(user)))
   }
 
-  def forumadmin = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => WithUri(views.html.forumadmin(Forum.all(), Some(user)))
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
+  def forumadmin = AdminAction { user =>
+    implicit request =>
+      WithUri(views.html.forumadmin(Forum.all(), Some(user)))
   }
 
   val forumForm = Form(tuple("name" -> nonEmptyText, "description" -> nonEmptyText))
 
-  def createForum = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            forumForm.bindFromRequest.fold(
-              formWithErrors => {
-                Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
-              },
-              data => {
-                Forum.create(data._1, data._2)
-                Redirect(routes.Administration.forumadmin).flashing("success" -> "Forum créé.")
-              })
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
+  def createForum = AdminAction { user =>
+    implicit request =>
+      forumForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          Forum.create(data._1, data._2)
+          Redirect(routes.Administration.forumadmin).flashing("success" -> "Forum créé.")
+        })
   }
 
-  def updateForum(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            forumForm.bindFromRequest.fold(
-              formWithErrors => {
-                Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
-              },
-              data => {
-                Forum.update(id, data._1, data._2)
-                Redirect(routes.Administration.forumadmin).flashing("success" -> "Forum bien mis à jour.")
-              })
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
+  def updateForum(id: Long) = AdminAction { user =>
+    implicit request =>
+      forumForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          Forum.update(id, data._1, data._2)
+          Redirect(routes.Administration.forumadmin).flashing("success" -> "Forum bien mis à jour.")
+        })
   }
 
-  def deleteForum(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            Forum.delete(id)
-            Redirect(routes.Administration.forumadmin).flashing("success" -> "Forum supprimé.")
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
+  def deleteForum(id: Long) = AdminAction { user =>
+    implicit request =>
+      Forum.delete(id)
+      Redirect(routes.Administration.forumadmin).flashing("success" -> "Forum supprimé.")
   }
 
-  val userForm = Form(tuple("main" -> text, "role" -> text))
+  val userForm = Form(tuple("main" -> text, "role" -> number))
 
-  def updateUser(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => {
-        user.role match {
-          case "admin" => {
-            userForm.bindFromRequest.fold(
-              formWithErrors => {
-                Redirect(routes.Administration.admin).flashing("error" -> "Formulaire incorrect.")
-              },
-              data => {
-                User.update(id, data._1, data._2)
-                Redirect(routes.Administration.admin).flashing("success" -> "Utilisateur bien mis à jour.")
-              })
-          }
-          case _ => unauthedAction
-        }
-      }
-      case None => unauthedAction
-    }
+  def updateUser(id: Long) = AdminAction { user =>
+    implicit request =>
+      userForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.admin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          User.update(id, data._1, Role.getById(data._2).getOrElse(Role.Default))
+          Redirect(routes.Administration.admin).flashing("success" -> "Utilisateur bien mis à jour.")
+        })
   }
 
-  def ranking = Action { implicit request =>
-    user match {
-      case Some(user) => user.role match {
-        case "admin" => {
-          WithUri(views.html.ranking.rankingadmin(CrawlError.all(), Some(user)))
-        }
-        case _ => unauthedAction
-      }
-      case None => unauthedAction
-    }
+  def ranking = AdminAction { user =>
+    implicit request =>
+      WithUri(views.html.ranking.rankingadmin(CrawlError.all(), Some(user)))
   }
 
   def crawlStatus = Action {
@@ -147,78 +90,55 @@ object Administration extends Utils {
     }
   }
 
-  def crawlErrors = Action { implicit request =>
-    import play.api.libs.concurrent.Execution.Implicits._
-    import crawler._
+  def crawlErrors = AdminAction { user =>
+    implicit request =>
+      import play.api.libs.concurrent.Execution.Implicits._
+      import crawler._
 
-    user match {
-      case Some(user) => user.role match {
-        case "admin" => {
-          if (!isCrawling) {
-            isCrawling = true
+      if (!isCrawling) {
+        isCrawling = true
 
-            val f = scala.concurrent.Future {
-              Crawler.processErrors
-            }
-
-            f onComplete {
-              case _ => {
-                Logger.info("Finished processing errors")
-                isCrawling = false
-              }
-            }
-            Redirect(currentUri).flashing("success" -> "Crawl started")
-          } else {
-            Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
-          }
-
+        val f = scala.concurrent.Future {
+          Crawler.processErrors
         }
-        case _ => unauthedAction
+
+        f onComplete {
+          case _ => {
+            Logger.info("Finished processing errors")
+            isCrawling = false
+          }
+        }
+        Redirect(currentUri).flashing("success" -> "Crawl started")
+      } else {
+        Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
       }
-      case None => unauthedAction
-    }
   }
 
-  def startCrawl = Action { implicit request =>
-    import play.api.libs.concurrent.Execution.Implicits._
-    import crawler._
+  def startCrawl = AdminAction { _ =>
+    implicit request =>
+      import play.api.libs.concurrent.Execution.Implicits._
+      import crawler._
 
-    user match {
-      case Some(user) => user.role match {
-        case "admin" => {
-          if (!isCrawling) {
-            isCrawling = true
+      if (!isCrawling) {
+        isCrawling = true
 
-            val f = scala.concurrent.Future { Crawler.crawl }
+        val f = scala.concurrent.Future { Crawler.crawl }
 
-            f onComplete {
-              case _ => {
-                Logger.info("crawling finished")
-                isCrawling = false
-              }
-            }
-            Redirect(currentUri).flashing("success" -> "Crawl started")
-          } else {
-            Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
+        f onComplete {
+          case _ => {
+            Logger.info("crawling finished")
+            isCrawling = false
           }
-
         }
-        case _ => unauthedAction
+        Redirect(currentUri).flashing("success" -> "Crawl started")
+      } else {
+        Redirect(currentUri).flashing("error" -> "A crawl is already in progress")
       }
-      case None => unauthedAction
-    }
   }
-  
-  def deleteError(id: Long) = Action { implicit request =>
-    user match {
-      case Some(user) => user.role match {
-        case "admin" => {
-        	CrawlError.delete(id)
-            Redirect(currentUri).flashing("success" -> ("Error " + id + " deleted."))
-        }
-        case _ => unauthedAction
-      }
-      case None => unauthedAction
-    }
+
+  def deleteError(id: Long) = AdminAction { _ =>
+    implicit request =>
+      CrawlError.delete(id)
+      Redirect(currentUri).flashing("success" -> ("Error " + id + " deleted."))
   }
 }

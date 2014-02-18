@@ -7,6 +7,7 @@ object Global extends GlobalSettings {
   override def onStart(app: Application) {
     if(Forum.all.isEmpty) createAdmin()
     if(Boss.all.isEmpty) createBosses()
+    if(Forum.all.isEmpty) createForums()
   }
   
   def createBosses() {
@@ -19,6 +20,11 @@ object Global extends GlobalSettings {
   }
   
   def createAdmin() {
-    User.create("Admin", "password", "", "admin")
+    User.create("Admin", "password", "")
+  }
+  
+  def createForums() {
+    Forum.create("Général", "Discussion Générale")
+    Forum.create("Recrutement", "On recrute")
   }
 }
