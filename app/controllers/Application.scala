@@ -11,10 +11,12 @@ import models._
 object Application extends Utils {
   def index = IsAuthenticated { user =>
     implicit request =>
-      val forums = Forum.all() map { forum =>
+      val forums = Forum.all() filter { forum =>
+        Role.canRead(user.role, forum.id)
+      } map { forum =>
         (forum, Forum.getInfo(forum.id))
       }
-      WithUri(views.html.index(forums, Some(user)))
+      WithUri(views.html.index(forums, user))
   }
 
   def forum(id: Long, page: Int = 0) = ReadAction(id) { user =>
@@ -23,7 +25,7 @@ object Application extends Utils {
         case Some(forum) => {
           val threads = Forum.getThreads(id, page, pageSize).map(t => (t, Thread.getThreadInfo(t.id)))
           val paging = Paging(page, (Forum.numThreads(id).toInt - 1) / pageSize)
-          WithUri(views.html.forum(forum, threads, paging, Some(user)))
+          WithUri(views.html.forum(forum, threads, paging, user))
         }
         case None => NotFound
       }
@@ -36,7 +38,7 @@ object Application extends Utils {
           val forum = Forum.getById(thread.forumId).get
           val posts = Thread.getPosts(id, page, pageSize) map { post => (post, User.getById(post.userId).get) }
           val paging = Paging(page, (Thread.numPosts(id).toInt - 1) / pageSize)
-          WithUri(views.html.thread(forum, thread, posts, paging, Some(user)))
+          WithUri(views.html.thread(forum, thread, posts, paging, user))
         }
         case None => NotFound
       }
@@ -99,7 +101,7 @@ object Application extends Utils {
 
   def newthread(forumId: Long) = IsAuthenticated { user =>
     implicit request =>
-      if (Role.canWrite(user.roleId, forumId)) {
+      if (Role.canWrite(user.role, forumId)) {
         newthreadForm.bindFromRequest.fold(
           formWithErrors => {
             Redirect(routes.Application.forum(forumId, 1)).flashing("error" -> "Vous devez remplir les champs !")
@@ -120,7 +122,7 @@ object Application extends Utils {
     implicit request =>
       Thread.getById(threadId) match {
         case Some(thread) => {
-          if (Role.canWrite(user.roleId, thread.forumId)) {
+          if (Role.canWrite(user.role, thread.forumId)) {
             newpostForm.bindFromRequest.fold(
               formWithErrors => {
                 Redirect(routes.Application.thread(threadId, 1)).flashing("error" -> "Vous devez remplir les champs !")

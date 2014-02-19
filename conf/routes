@@ -22,6 +22,14 @@ POST	/forum/:id/upate			controllers.Administration.updateForum(id: Long)
 POST	/forum/:id/delete			controllers.Administration.deleteForum(id: Long)
 POST	/forum/create				controllers.Administration.createForum
 
+POST	/role/create				controllers.Administration.createRole
+POST	/role/delete				controllers.Administration.deleteRole(id: Long)
+POST	/role/:id/update			controllers.Administration.updateRole(id: Long)
+
+POST	/permission/create						controllers.Administration.createPermission
+POST	/permission/:roleId/:forumId/delete		controllers.Administration.deletePermission(roleId: Long, forumId: Long)
+POST	/permission/:roleId/:forumId/update		controllers.Administration.updatePermission(roleId: Long, forumId: Long)
+
 GET		/admin/ranking					controllers.Administration.ranking
 POST	/admin/startCrawl				controllers.Administration.startCrawl
 POST	/admin/crawlErrors				controllers.Administration.crawlErrors

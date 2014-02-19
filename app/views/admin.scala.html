@@ -1,4 +1,4 @@
-@(users: List[User], user: Option[User])(implicit flash: Flash)
+@(users: List[User], roles: List[Role], user: User)(implicit flash: Flash)
 
 @import helper._
 
@@ -10,13 +10,14 @@
 		<div class="thread-header">
 			<div class="row">
 				<div class="col-md-12">
-					<h3>Administration - Utilisateurs</h3>
+					<h3>Administration</h3>
 				</div>
 			</div>
 		</div>
 		
 		<div>
 			<div>
+				<h4>Utilisateurs</h4>
 				<table class="table table-bordered table-hover">
 					<thead>
 						<tr>
@@ -34,11 +35,54 @@
 								<td>@u.id</td>
 								<td>@u.name</td>
 								<td><input type="text" class="form-control" name="main" id="main" value="@u.main"></td>
-								<td><input type="text" class="form-control" name="role" id="role" value="@u.role"></td>
+								<td><select class="form-control" name="role" id="role">
+								@Role.all.map { r =>
+									<option value="@r.id" @if(r.id == u.role.id) { selected }>@r.title</option>
+								}
+								</select></td>
 								<td><input type="submit" class="btn btn-default" value="Modifier"></td>
 							}
 						</tr>
 					}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div>
+			<div>
+				<h4>R&ocirc;les</h4>
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>id</th>
+							<th>Titre</th>
+							<th>Admin</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+					@roles.map { r =>
+						<tr>
+							@form(routes.Administration.updateRole(r.id)) {
+								<td>@r.id</td>
+								<td><input type="text" class="form-control" name="title" id="title" value="@r.title"></td>
+								<td><input type="checkbox" name="isAdmin" id="isAdmin" @if(r.isAdmin) { checked="" } value="true"></td>
+								<td><input type="submit" class="btn btn-default" value="Modifier"></td>
+							}
+							@form(routes.Administration.deleteRole(r.id)) {
+								<td><input type="submit" class="btn btn-danger" value="Supprimer"></td>
+							}
+						</tr>
+					}
+						<tr>
+							@form(routes.Administration.createRole()) {
+								<td></td>
+								<td><input type="text" class="form-control" name="title" id="title"></td>
+								<td><input type="checkbox" name="isAdmin" id="isAdmin" value="true"></td>
+								<td><input type="submit" class="btn btn-success" value="Cr&eacute;er"></td>
+							}
+						</tr>
 					</tbody>
 				</table>
 			</div>

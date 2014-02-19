@@ -1,4 +1,4 @@
-@(forum: Forum, thread: Thread, posts: List[(Post, User)], paging: Paging, user: Option[User])(implicit flash: Flash)
+@(forum: Forum, thread: Thread, posts: List[(Post, User)], paging: Paging, user: User)(implicit flash: Flash)
 
 @import helper._
 
@@ -50,7 +50,7 @@
 						<td class="cell-profile">
 							@post._2.name
 							<br/>
-							<small>@post._2.role</small>
+							<small>@post._2.role.title</small>
 							<br/><br/>
 							Main: <a href="http://eu.battle.net/wow/character/illidan/@post._2.main/">@post._2.main</a>
 						</td>
@@ -63,7 +63,7 @@
 		
 		@threadHeader(thread, forum)
 		
-		@user.map { _ =>
+		@if(Role.canWrite(user.role, forum.id)) {
 			@form(routes.Application.newpost(thread.id)) {
 				<div class="row"><div class="col-md-8 col-md-offset-2">
 				<h3>R&eacute;ponse</h3>

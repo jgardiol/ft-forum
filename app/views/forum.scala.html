@@ -1,4 +1,4 @@
-@(forum: Forum, threads: List[(Thread, ThreadInfo)], paging: Paging, user: Option[User])(implicit flash: Flash)
+@(forum: Forum, threads: List[(Thread, ThreadInfo)], paging: Paging, user: User)(implicit flash: Flash)
 
 @formatted(date: java.util.Date) = @{
 		val formatter: java.text.SimpleDateFormat = new java.text.SimpleDateFormat("dd-MM-YYYY HH:mm")
@@ -57,7 +57,7 @@
 		
 		@header(forum)
 		
-		@user.map { _ =>
+		@if(Role.canWrite(user.role, forum.id)) {
 			<div class="newthread-form">
 				<div class="row"><div class="col-md-8 col-md-offset-2">
 				<h3>Nouveau sujet</h3>

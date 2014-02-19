@@ -21,6 +21,7 @@ object Global extends GlobalSettings {
   
   def createAdmin() {
     User.create("Admin", "password", "")
+    User.update(1, "", Role.getById(0).get)
   }
   
   def createForums() {

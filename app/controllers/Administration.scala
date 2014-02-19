@@ -19,12 +19,12 @@ object Administration extends Utils {
 
   def admin = AdminAction { user =>
     implicit request =>
-      WithUri(views.html.admin(User.all(), Some(user)))
+      WithUri(views.html.admin(User.all(), Role.all(), user))
   }
 
   def forumadmin = AdminAction { user =>
     implicit request =>
-      WithUri(views.html.forumadmin(Forum.all(), Some(user)))
+      WithUri(views.html.forumadmin(Forum.all(), Permission.all(), Role.all(), user))
   }
 
   val forumForm = Form(tuple("name" -> nonEmptyText, "description" -> nonEmptyText))
@@ -68,14 +68,79 @@ object Administration extends Utils {
           Redirect(routes.Administration.admin).flashing("error" -> "Formulaire incorrect.")
         },
         data => {
+          Logger.info("Formulaire: " + data._2)
+          Logger.info("Role: " + Role.getById(data._2))
           User.update(id, data._1, Role.getById(data._2).getOrElse(Role.Default))
           Redirect(routes.Administration.admin).flashing("success" -> "Utilisateur bien mis à jour.")
         })
   }
 
+  val roleForm = Form(tuple("title" -> text, "isAdmin" -> optional(boolean)))
+
+  def updateRole(id: Long) = AdminAction { user =>
+    implicit request =>
+      roleForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.admin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          Role.update(id, data._1, data._2.getOrElse(false))
+          Redirect(routes.Administration.admin).flashing("success" -> "Rôle bien mis à jour.")
+        })
+  }
+
+  def createRole = AdminAction { user =>
+    implicit request =>
+      roleForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.admin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          Role.create(data._1, data._2.getOrElse(false))
+          Redirect(routes.Administration.admin).flashing("success" -> "Rôle bien créé.")
+        })
+  }
+
+  def deleteRole(id: Long) = AdminAction { user =>
+    implicit request =>
+      Role.delete(id)
+      Redirect(routes.Administration.admin).flashing("success" -> "Rôle bien supprimé.")
+  }
+
+  val permissionForm = Form(tuple("roleId" -> number, "forumId" -> number, "permission" -> number))
+
+  def createPermission = AdminAction { user =>
+    implicit request =>
+      permissionForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          Permission.create(data._2, data._1, data._3)
+          Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission créée.")
+        })
+  }
+
+  def updatePermission(roleId: Long, forumId: Long) = AdminAction { user =>
+    implicit request =>
+      permissionForm.bindFromRequest.fold(
+        formWithErrors => {
+          Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
+        },
+        data => {
+          Permission.update(data._2, data._1, data._3)
+          Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission mise à jour.")
+        })
+  }
+
+  def deletePermission(roleId: Long, forumId: Long) = AdminAction { user => implicit request =>
+    Permission.delete(roleId, forumId)
+    Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission supprimée.")
+  }
+
   def ranking = AdminAction { user =>
     implicit request =>
-      WithUri(views.html.ranking.rankingadmin(CrawlError.all(), Some(user)))
+      WithUri(views.html.ranking.rankingadmin(CrawlError.all(), user))
   }
 
   def crawlStatus = Action {

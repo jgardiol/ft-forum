@@ -39,7 +39,7 @@ trait Utils extends Controller {
 
   def AdminAction(action: => User => Request[AnyContent] => Result) = IsAuthenticated { user =>
     request =>
-      if (Role.isAdmin(user.roleId))
+      if (user.role.isAdmin)
         action(user)(request)
       else
         unauthedAction
@@ -47,7 +47,7 @@ trait Utils extends Controller {
 
   def ReadAction(forumId: Long)(action: => User => Request[AnyContent] => Result) = IsAuthenticated { user =>
     request =>
-      if (Role.canRead(user.roleId, forumId))
+      if (Role.canRead(user.role, forumId))
         action(user)(request)
       else
         unauthedAction
@@ -57,7 +57,7 @@ trait Utils extends Controller {
     request =>
       Post.getById(postId) match {
         case Some(post) => {
-          if (Role.isModerator(user.roleId, Thread.getById(post.threadId).get.forumId)
+          if (Role.isModerator(user.role, Thread.getById(post.threadId).get.forumId)
               || post.userId == user.id) {
             action(user)(request)
           } else {

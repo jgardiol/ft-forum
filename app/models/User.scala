@@ -8,7 +8,7 @@ import anorm.SqlParser._
 
 import org.mindrot.jbcrypt.BCrypt
 
-case class User(id: Long, name: String, password: String, main: String, roleId: Long)
+case class User(id: Long, name: String, password: String, main: String, role: Role)
 
 object User {
   val simple = {
@@ -16,12 +16,12 @@ object User {
       get[String]("name") ~
       get[String]("password") ~
       get[String]("main") ~
-      get[Long]("roleId") map {
-        case id ~ name ~ password ~ main ~ roleId => User(id, name, password, main, roleId)
+      get[Option[Long]]("role_id") map {
+        case id ~ name ~ password ~ main ~ roleId => User(id, name, password, main, Role.getById(roleId.getOrElse(-1)).getOrElse(Role.Guest))
       }
   }
   
-  val Guest = User(-1, "Guest", "", "", Role.Guest.id)
+  val Guest = User(-1, "Guest", "", "", Role.Guest)
 
   def all(): List[User] = {
     DB.withConnection { implicit c =>

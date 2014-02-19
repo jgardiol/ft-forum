@@ -1,4 +1,4 @@
-@(forums: List[Forum], user: Option[User])(implicit flash: Flash)
+@(forums: List[Forum], permissions: List[Permission], roles: List[Role], user: User)(implicit flash: Flash)
 
 @import helper._
 
@@ -10,13 +10,14 @@
 		<div class="thread-header">
 			<div class="row">
 				<div class="col-md-12">
-					<h3>Administration - Forums</h3>
+					<h3>Administration</h3>
 				</div>
 			</div>
 		</div>
 		
 		<div>
 			<div>
+				<h4>Forums</h4>
 				<table class="table table-bordered table-hover">
 					<thead>
 						<tr>
@@ -47,6 +48,61 @@
 								<td><input type="text" class="form-control" name="name" id="name" placeholder="Nom du forum"></td>
 								<td><input type="text" class="form-control" name="description" id="description" placeholder="Description"></td>
 								<td><input type="submit" class="btn btn-success" value="Cr&eacute;er"></td>
+							}
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div>
+			<div>
+				<h4>Permissions</h4>
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Role Id</th>
+							<th>Forum Id</th>
+							<th>Level</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+					@permissions.map { p =>
+						<tr>
+							@form(routes.Administration.updatePermission(p.roleId, p.forumId)) {
+								<td>@Role.getById(p.roleId).get.title</td>
+								<td>@Forum.getById(p.forumId).get.name</td>
+								<td><select class="form-control" name="permission" id="permission">
+								@Permission.text.map { key =>
+									<option value="@key._1" @if(key._1 == p.permission) { selected }>@key._2</option>
+								}
+								</select></td>
+								<td><input type="submit" class="btn btn-default" value="Modifier"></td>
+							}
+							<form method="POST" action="@routes.Administration.deletePermission(p.roleId, p.forumId)">
+								<td><input type="submit" class="btn btn-danger" value="Supprimer"></td>
+							</form>
+						</tr>
+					}
+						<tr>
+							@form(routes.Administration.createPermission()) {
+								<td><select class="form-control" name="roleId" id="roleId">
+								@roles.map { r =>
+									<option value="@r.id">@r.title</option>
+								}
+								</select></td>
+								<td><select class="form-control" name="forumId" id="ForumId">
+								@forums.map { f =>
+									<option value="@f.id">@f.name</option>
+								}
+								</select></td>
+								<td><select class="form-control" name="permission" id="permission">
+								@Permission.text.map { key =>
+									<option value="@key._1">@key._2</option>
+								}
+								</select></td>
+								<td><input type="submit" class="btn btn-default" value="Cr&eacute;er"></td>
 							}
 						</tr>
 					</tbody>
