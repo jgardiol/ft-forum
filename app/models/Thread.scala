@@ -36,7 +36,7 @@ object Thread {
 
   def getPosts(threadId: Long): List[Post] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM posts WHERE post.thread_id = {thread_id} ORDER BY created ASC").on(
+      SQL("SELECT * FROM posts WHERE thread_id={thread_id} ORDER BY created ASC").on(
           'thread_id -> threadId).as(Post.simple *)
     }
   }
