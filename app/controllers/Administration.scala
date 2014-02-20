@@ -68,8 +68,6 @@ object Administration extends Utils {
           Redirect(routes.Administration.admin).flashing("error" -> "Formulaire incorrect.")
         },
         data => {
-          Logger.info("Formulaire: " + data._2)
-          Logger.info("Role: " + Role.getById(data._2))
           User.update(id, data._1, Role.getById(data._2).getOrElse(Role.Default))
           Redirect(routes.Administration.admin).flashing("success" -> "Utilisateur bien mis à jour.")
         })
