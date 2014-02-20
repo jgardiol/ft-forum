@@ -120,15 +120,17 @@ object Administration extends Utils {
           Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission créée.")
         })
   }
+  
+  val updatePermissionForm = Form(single("permission" -> number))
 
   def updatePermission(roleId: Long, forumId: Long) = AdminAction { user =>
     implicit request =>
-      permissionForm.bindFromRequest.fold(
+      updatePermissionForm.bindFromRequest.fold(
         formWithErrors => {
           Redirect(routes.Administration.forumadmin).flashing("error" -> "Formulaire incorrect.")
         },
-        data => {
-          Permission.update(data._2, data._1, data._3)
+        permission => {
+          Permission.update(roleId, forumId, permission)
           Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission mise à jour.")
         })
   }
