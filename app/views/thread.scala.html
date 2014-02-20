@@ -62,9 +62,7 @@
 						&nbsp;<button type="submit" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#editModal@post._1.id">Modifier</button>
 					}
 					@if(i+offset != 1 && Role.isModerator(user.role, forum.id)) {
-						@form(routes.Application.deletepost(post._1.id)) {
-						&nbsp;<input type="submit" class="btn btn-danger btn-xs" value="Supprimer">
-						}
+						&nbsp;<button type="submit" class="btn btn-danger btn-xs" onClick="deletePost(@post._1.id)">Supprimer</button>
 					}
 					</td>
 					</tr>
@@ -72,7 +70,7 @@
 			</div>
 		</div>
 		
-		<!-- Signup Modal -->
+		<!-- Edit Modal -->
 		<div class="modal fade" id="editModal@post._1.id" tabindex="-1" role="dialog" aria-labelledby="editLabel" aria-hidden="true">
 		  <div class="modal-dialog">
 			<div class="modal-content">
@@ -116,4 +114,10 @@
 			</div>
 		}
 	</div>
+	
+	<script>
+		function deletePost(id) {
+			$.post('/post/' + id + '/delete', function() { window.location.href = '/post/' + id + '/delete });
+		}
+	</script>
 }
