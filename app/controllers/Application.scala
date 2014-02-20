@@ -165,4 +165,22 @@ object Application extends Utils {
         case None => NotFound
       }
   }
+  
+  def deletepost(id: Long) = IsAuthenticated { user => implicit request =>
+    Post.getById(id) match {
+      case Some(post) => {
+        if(Role.isModerator(user.role, Thread.getById(post.threadId).get.forumId)) {
+          if(Thread.getPosts(post.threadId).head.id == id) {
+            Redirect(routes.Application.thread(post.threadId, 1)).flashing("error" -> "Le premier post ne peut pas être supprimé. Vous devez supprimer le sujet entier") 
+          } else {
+            Post.delete(id)
+            Redirect(routes.Application.thread(post.threadId, 1)).flashing("success" -> "Post bien supprimé.")
+          }
+        } else {
+          unauthedAction
+        }
+      }
+      case None => NotFound
+    }
+  }
 }

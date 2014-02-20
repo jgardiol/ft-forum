@@ -57,5 +57,11 @@ object Post {
         'user_id -> userId).executeUpdate()
     }
   }
+  
+  def delete(id: Long) {
+    DB.withConnection { implicit c => 
+     SQL("DELETE FROM posts WHERE id={id}").on('id -> id).executeUpdate()  
+    }
+  }
 
 }

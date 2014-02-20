@@ -61,6 +61,11 @@
 					@if(Post.isOwner(post._1.id, user.id) || Role.isModerator(user.role, forum.id)) {
 						&nbsp;<button type="submit" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#editModal@post._1.id">Modifier</button>
 					}
+					@if(i+offset != 1 && Role.isModerator(user.role, forum.id)) {
+						@form(routes.Application.deletepost(post._1.id)) {
+						&nbsp;<input type="submit" class="btn btn-danger btn-xs" value="Supprimer">
+						}
+					}
 					</td>
 					</tr>
 				</table>
