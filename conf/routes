@@ -12,6 +12,7 @@ GET		/thread/:id/:page			controllers.Application.thread(id: Long, page: Int)
 
 POST	/forum/:id/create			controllers.Application.newthread(id: Long)
 POST	/thread/:id/create			controllers.Application.newpost(id: Long)
+POST	/post/:id/edit				controllers.Application.editpost(id: Long)
 
 # Administration
 GET		/admin						controllers.Administration.admin

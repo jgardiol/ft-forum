@@ -9,6 +9,12 @@ import scala.concurrent.Future
 import models._
 
 object Application extends Utils {
+
+  def formatted(date: java.util.Date) = {
+    val formatter: java.text.SimpleDateFormat = new java.text.SimpleDateFormat("dd MMMM YYYY '&agrave;' HH:mm", java.util.Locale.FRANCE)
+    formatter.format(date)
+  }
+
   def index = IsAuthenticated { user =>
     implicit request =>
       val forums = Forum.all() filter { forum =>
@@ -108,7 +114,7 @@ object Application extends Utils {
           },
           threadData => {
             val threadId = Thread.create(threadData._1, user.id, forumId)
-            Post.create(threadData._2, new java.util.Date(), threadId, user.id)
+            Post.create(threadData._2, threadId, user.id)
             Redirect(routes.Application.thread(threadId, 1)).flashing("success" -> "Votre sujet a bien été créé.")
           })
       } else {
@@ -128,8 +134,29 @@ object Application extends Utils {
                 Redirect(routes.Application.thread(threadId, 1)).flashing("error" -> "Vous devez remplir les champs !")
               },
               postData => {
-                Post.create(postData, new java.util.Date(), threadId, user.id)
+                Post.create(postData, threadId, user.id)
                 Redirect(routes.Application.thread(threadId, 1)).flashing("success" -> "Votre post a bien été créé.")
+              })
+          } else {
+            unauthedAction
+          }
+        }
+        case None => NotFound
+      }
+  }
+
+  def editpost(id: Long) = IsAuthenticated { user =>
+    implicit request =>
+      Post.getById(id) match {
+        case Some(post) => {
+          if (Post.isOwner(id, user.id) || Role.isModerator(user.role, Thread.getById(post.threadId).get.forumId)) {
+            newpostForm.bindFromRequest.fold(
+              formWithErrors => {
+                Redirect(routes.Application.thread(post.threadId, 1)).flashing("error" -> "Formulaire incorrect.")
+              },
+              data => {
+                Post.update(id, data, user.id)
+                Redirect(routes.Application.thread(post.threadId, 1)).flashing("success" -> "Post bien mis à jour.")
               })
           } else {
             unauthedAction

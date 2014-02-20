@@ -17,7 +17,7 @@ object User {
       get[String]("password") ~
       get[String]("main") ~
       get[Option[Long]]("role_id") map {
-        case id ~ name ~ password ~ main ~ roleId => User(id, name, password, main, Role.getById(roleId.getOrElse(-1)).getOrElse(Role.Guest))
+        case id ~ name ~ password ~ main ~ roleId => User(id, name, password, main, Role.getById(roleId.getOrElse(Role.Default.id)).getOrElse(Role.Default))
       }
   }
   

@@ -2,11 +2,6 @@
 
 @import helper._
 
-@formatted(date: java.util.Date) = @{
-		val formatter: java.text.SimpleDateFormat = new java.text.SimpleDateFormat("dd-MM-YYYY HH:mm")
-		formatter.format(date)
-}
-
 @threadHeader(thread: Thread, forum: Forum) = {
 	<div class="thread-header">
 			<div class="row">
@@ -37,7 +32,7 @@
 			<div class="post-header">
 				<div class="row">
 					<div class="col-md-6">
-						<small>Post&eacute; le @formatted(post._1.created)</small>
+						<small>Post&eacute; le @Html(Application.formatted(post._1.created))</small>
 					</div>
 					<div class="col-md-6 text-right">
 						<a href="#@(i+offset)" name="@(i+offset)">#@(i+offset)</a>
@@ -47,34 +42,70 @@
 			<div class="post-body">
 				<table width="100%">
 					<tr>
-						<td class="cell-profile">
+						<td class="cell-profile" rowspan="2">
 							@post._2.name
 							<br/>
 							<small>@post._2.role.title</small>
 							<br/><br/>
-							Main: <a href="http://eu.battle.net/wow/character/illidan/@post._2.main/">@post._2.main</a>
+							<a href="http://eu.battle.net/wow/character/illidan/@post._2.main/">@post._2.main</a>
 						</td>
 						<td class="cell-content">@post._1.content</td>	
+					</tr>
+					<tr>
+					<td align="right">
+					@post._1.modified.map { date =>
+						<small>
+						Derni&egrave;re modification par @User.getById(post._1.modifiedBy.getOrElse(0)).get.name le @Html(Application.formatted(date))
+						</small>
+					}
+					@if(Post.isOwner(post._1.id, user.id) || Role.isModerator(user.role, forum.id)) {
+						&nbsp;<button type="submit" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#editModal@post._1.id">Modifier</button>
+					}
+					</td>
 					</tr>
 				</table>
 			</div>
 		</div>
+		
+		<!-- Signup Modal -->
+		<div class="modal fade" id="editModal@post._1.id" tabindex="-1" role="dialog" aria-labelledby="editLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title" id="editLabel">Modifier un post</h4>
+			  </div>
+			  <div class="modal-body">
+				@form(routes.Application.editpost(post._1.id)) {
+					<div class="form-group">
+							<label for="content">Contenu <small>(Formatage avec <a href="http://fr.wikipedia.org/wiki/Markdown">Markdown</a>)</small></label>
+							<textarea class="form-control" id="content" name="content" rows="8">@post._1.content</textarea>
+					</div>
+					<div class="text-center">
+						<input type="submit" class="btn btn-primary" value="Modifier">
+						<button class="btn btn-default" data-dismiss="modal">Annuler</button>
+					</div>
+				}
+			  </div>
+			</div>
+		  </div>
+		</div>
+		
 		}}
 		
 		@threadHeader(thread, forum)
 		
 		@if(Role.canWrite(user.role, forum.id)) {
+			<div class="row"><div class="col-md-8 col-md-offset-2">
+			<h3>R&eacute;ponse</h3>
 			@form(routes.Application.newpost(thread.id)) {
-				<div class="row"><div class="col-md-8 col-md-offset-2">
-				<h3>R&eacute;ponse</h3>
-				<form role="form">
-					<div class="form-group">
-						<label for="content">Contenu <small>(Formatage avec <a href="http://fr.wikipedia.org/wiki/Markdown">Markdown</a>)</small></label>
-						<textarea class="form-control" id="content" name="content" rows="8"></textarea>
-					</div>
-					<div class="text-center">
-						<input type="submit" class="btn btn-primary" value="Envoyer">
-					</div>
+				<div class="form-group">
+					<label for="content">Contenu <small>(Formatage avec <a href="http://fr.wikipedia.org/wiki/Markdown">Markdown</a>)</small></label>
+					<textarea class="form-control" id="content" name="content" rows="8"></textarea>
+				</div>
+				<div class="text-center">
+					<input type="submit" class="btn btn-primary" value="Envoyer">
+				</div>
 			}
 				</div></div>
 			</div>
