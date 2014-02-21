@@ -49,7 +49,7 @@
 							<td class="cell-forum-threads">@(thread._2.numPosts - 1)</td>
 							<td class="cell-forum-message">@thread._2.lastAuthor<br/><small>@Html(Application.formatted(thread._2.lastCreated))</small></td>
 						</tr>
-						@form(routes.Application.deletethread(post._1.id), 'id -> ("del"+thread._1.id)) {
+						@form(routes.Application.deletethread(thread._1.id), 'id -> ("del"+thread._1.id)) {
 					}
 					}
 				</table>
