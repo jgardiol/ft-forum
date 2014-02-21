@@ -30,7 +30,7 @@
 							<td class="cell-forum-threads">@forumData._2.numThreads</td>
 							@forumData._2.lastThread match {
 								case Some(thread) => {
-									<td class="cell-forum-message"><a href="@routes.Application.thread(thread.id, 1)">@thread.title</a><br/><small>par @forumData._2.lastThreadAuthor.get.name, le @Html(Application.formatted(forumData._2.created))</small></td>
+									<td class="cell-forum-message"><a href="@routes.Application.thread(thread.id, 1)">@thread.title</a><br/><small>par @forumData._2.lastPostAuthor.get.name, le @Html(Application.formatted(forumData._2.created))</small></td>
 								}
 								case None => {
 									<td class="cell-forum-message">Aucun message</td>

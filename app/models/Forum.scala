@@ -8,7 +8,7 @@ import play.api.Play.current
 
 case class Forum(id: Long, name: String, description: String)
 
-case class ForumInfo(id: Long, numThreads: Long, lastThread: Option[Thread], lastThreadAuthor: Option[User], created: java.util.Date)
+case class ForumInfo(id: Long, numThreads: Long, lastThread: Option[Thread], lastPostAuthor: Option[User], created: java.util.Date)
 
 object Forum {
   def all(): List[Forum] = DB.withConnection { implicit c =>
@@ -107,8 +107,8 @@ object Forum {
 
     lastThread match {
       case Some(thread) => {
-        val created = Thread.getLastPost(thread.id).created
-        ForumInfo(id, num, Some(thread), User.getById(thread.userId), created)
+        val lastPost = Thread.getLastPost(thread.id)
+        ForumInfo(id, num, Some(thread), User.getById(lastPost.userId), lastPost.created)
       }
       case None => ForumInfo(id, num, None, None, new java.util.Date())
     }
