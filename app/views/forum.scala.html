@@ -43,12 +43,14 @@
 						<tr>
 							<td class="cell-forum-name">
 							@if(Role.isModerator(user.role, forum.id)) {
-								<a onClick="deleteThread(@thread._1.id)">[&times;]</a>
+								[<a href="#" title="Supprimer" onClick="deleteThread(@thread._1.id)">&times;</a>]
 							}
 							<a href="@routes.Application.thread(thread._1.id, 1)">@thread._1.title</a></td>
 							<td class="cell-forum-threads">@(thread._2.numPosts - 1)</td>
 							<td class="cell-forum-message">@thread._2.lastAuthor<br/><small>@Html(Application.formatted(thread._2.lastCreated))</small></td>
 						</tr>
+						@form(routes.Application.deletethread(post._1.id), 'id -> ("del"+thread._1.id)) {
+					}
 					}
 				</table>
 			</div>
