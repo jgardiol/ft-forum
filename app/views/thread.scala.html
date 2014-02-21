@@ -64,6 +64,8 @@
 					@if(i+offset != 1 && Role.isModerator(user.role, forum.id)) {
 						&nbsp;<button type="submit" class="btn btn-danger btn-xs" onClick="deletePost(@post._1.id)">Supprimer</button>
 					}
+					@form(routes.Application.deletepost(post._1.id), 'id -> ("del"+post._1.id)) {
+					}
 					</td>
 					</tr>
 				</table>
@@ -117,7 +119,7 @@
 	
 	<script>
 		function deletePost(id) {
-			$.post('/post/' + id + '/delete');
+			$('#del'+id).submit();
 		}
 	</script>
 }
