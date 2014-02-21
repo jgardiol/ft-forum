@@ -122,6 +122,21 @@ object Application extends Utils {
       }
   }
 
+  def deletethread(id: Long) = IsAuthenticated { user =>
+    implicit request =>
+      Thread.getById(id) match {
+        case Some(thread) => {
+          if (Role.isModerator(user.role, thread.forumId)) {
+            Thread.delete(id)
+            Redirect(routes.Application.forum(thread.forumId, 1)).flashing("success" -> "Sujet supprimé.")
+          } else {
+            Redirect(routes.Application.forum(thread.forumId, 1)).flashing("erreur" -> "Ce sujet n'existe pas.")
+          }
+        }
+        case None => NotFound
+      }
+  }
+
   val newpostForm = Form(single("content" -> nonEmptyText))
 
   def newpost(threadId: Long) = IsAuthenticated { user =>
@@ -165,22 +180,23 @@ object Application extends Utils {
         case None => NotFound
       }
   }
-  
-  def deletepost(id: Long) = IsAuthenticated { user => implicit request =>
-    Post.getById(id) match {
-      case Some(post) => {
-        if(Role.isModerator(user.role, Thread.getById(post.threadId).get.forumId)) {
-          if(Thread.getPosts(post.threadId).head.id == id) {
-            Redirect(routes.Application.thread(post.threadId, 1)).flashing("error" -> "Le premier post ne peut pas être supprimé. Vous devez supprimer le sujet entier") 
+
+  def deletepost(id: Long) = IsAuthenticated { user =>
+    implicit request =>
+      Post.getById(id) match {
+        case Some(post) => {
+          if (Role.isModerator(user.role, Thread.getById(post.threadId).get.forumId)) {
+            if (Thread.getPosts(post.threadId).head.id == id) {
+              Redirect(routes.Application.thread(post.threadId, 1)).flashing("error" -> "Le premier post ne peut pas être supprimé. Vous devez supprimer le sujet entier")
+            } else {
+              Post.delete(id)
+              Redirect(routes.Application.thread(post.threadId, 1)).flashing("success" -> "Post bien supprimé.")
+            }
           } else {
-            Post.delete(id)
-            Redirect(routes.Application.thread(post.threadId, 1)).flashing("success" -> "Post bien supprimé.")
+            unauthedAction
           }
-        } else {
-          unauthedAction
         }
+        case None => NotFound
       }
-      case None => NotFound
-    }
   }
 }

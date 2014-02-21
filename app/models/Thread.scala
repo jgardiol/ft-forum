@@ -26,23 +26,22 @@ object Thread {
         'title -> title,
         'userId -> userId,
         'forumId -> forumId).executeUpdate()
-        
-        
+
       SQL("SELECT * FROM threads WHERE user_id = {user_id} AND forum_id = {forum_id} ORDER BY id DESC").on(
-          'user_id -> userId,
-          'forum_id -> forumId).as(simple *).head.id
+        'user_id -> userId,
+        'forum_id -> forumId).as(simple *).head.id
     }
   }
 
   def getPosts(threadId: Long): List[Post] = {
     DB.withConnection { implicit c =>
       SQL("SELECT * FROM posts WHERE thread_id={thread_id} ORDER BY created ASC").on(
-          'thread_id -> threadId).as(Post.simple *)
+        'thread_id -> threadId).as(Post.simple *)
     }
   }
-  
+
   def getPosts(threadId: Long, page: Int, pageSize: Int): List[Post] = {
-    val offset = (page-1) * pageSize
+    val offset = (page - 1) * pageSize
 
     DB.withConnection { implicit c =>
       SQL("""
@@ -57,22 +56,22 @@ object Thread {
         'offset -> offset).as(Post.simple*)
     }
   }
-  
+
   def getById(id: Long): Option[Thread] = {
     DB.withConnection { implicit c =>
       SQL("SELECT * FROM threads WHERE threads.id = {id}").on(
-          'id -> id).as(simple.singleOpt)
-      
+        'id -> id).as(simple.singleOpt)
+
     }
   }
-  
+
   def getLastPost(threadId: Long): Post = {
     DB.withConnection { implicit c =>
       SQL("SELECT * FROM posts WHERE thread_id = {thread_id} ORDER BY posts.created DESC").on(
-          'thread_id -> threadId).as(Post.simple *).head
-      }
+        'thread_id -> threadId).as(Post.simple *).head
+    }
   }
-  
+
   def numPosts(id: Long): Long = {
     DB.withConnection { implicit c =>
       SQL("""
@@ -80,13 +79,19 @@ object Thread {
           FROM posts
           WHERE thread_id = {id}
           """).on(
-              'id -> id).as(get[Long]("num_posts").single)
-      }
+        'id -> id).as(get[Long]("num_posts").single)
+    }
   }
-  
+
   def getThreadInfo(id: Long): ThreadInfo = {
     val lastPost = Thread.getLastPost(id)
     ThreadInfo(id, numPosts(id), User.getById(lastPost.userId).get.name, lastPost.created)
+  }
+
+  def delete(id: Long) {
+    DB.withConnection { implicit c =>
+      SQL("DELETE FROM threads WHERE id={id}").on('id -> id).executeUpdate()
+    }
   }
 
 }
