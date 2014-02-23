@@ -9,7 +9,7 @@ import models.ranking._
 object Armory {
 
   // See http://blizzard.github.io/api-wow-docs/#character-profile-api/guild
-  val URL = "/api/wow/character/illidan/CHAR_NAME"
+  val URL = "http://eu.battle.net/api/wow/character/illidan/CHAR_NAME"
 
   private def getResponse(charname: String) =
     WS.url(URL.replaceAll("CHAR_NAME", charname)).withQueryString("fields" -> "guild").get()
