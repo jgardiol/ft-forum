@@ -25,19 +25,26 @@ object Armory {
 
     getResponse(name) onComplete {
       case Success(response) => {
-        Logger.info("status: " + response.status)
         if (response.status == 200) {
           val guildname = (response.json \ "guild" \ "name").as[String]
-          Logger.info("guildname: " + guildname)
+          PlayerInfo.getByName(name) match {
+            case Some(player) => if(player.guild != guildname) PlayerInfo.updateGuild(name, guildname)
+            case None => PlayerInfo.create(name, guildname)
+          }
+        } else if(response.status == 404) {
+          PlayerInfo.getByName(name).map(p => PlayerInfo.delete(p.id))
+        } else {
+          val message = (response.json \ "reason").as[String]
+          Logger.error("Error: " + message)
         }
       }
       case Failure(t) => Logger.error("Error while getting info for " + name + ", message: " + t.getMessage())
     }
   }
-
-  // For each player, get guild name.
-  // On error:
-  // - 404: remove player from DB
-  // - 5xx: log, ignore, retry later
-
+  
+  def processPlayers(names: List[String]) {
+    for(name <- names) {
+      processPlayer(name)
+    }
+  }
 }

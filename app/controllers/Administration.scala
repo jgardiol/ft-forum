@@ -142,6 +142,11 @@ object Administration extends Utils {
     implicit request =>
       WithUri(views.html.ranking.rankingadmin(CrawlError.all(), user))
   }
+  
+  def getPlayerGuilds = AdminAction { user => implicit request =>    
+    Armory.processPlayers(models.ranking.Report.getPlayerNames)
+    Redirect(routes.Administration.ranking).flashing("success" -> "Players are being processed")
+  }
 
   def crawlStatus = Action {
     Ok.chunked(stillCrawling &> Comet(callback = "parent.stillCrawling"))
@@ -151,7 +156,7 @@ object Administration extends Utils {
     import scala.concurrent.duration._
 
     Enumerator.generateM {
-      Promise.timeout(Some(isCrawling.toString), 100 milliseconds)
+      Promise.timeout(Some(isCrawling.toString), 500 milliseconds)
     }
   }
 

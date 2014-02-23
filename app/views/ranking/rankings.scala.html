@@ -64,7 +64,7 @@
 			@for((report, i) <- reports.zipWithIndex) {
 				<tr>
 					<td>@(i+1)</td>
-					<td>@report.playerName</td>
+					<td>@report.playerName @models.ranking.PlayerInfo.getByName(report.playerName).map(n => "&lt;"+n+"&gt;")</td>
 					<td>@report.spec.split(" ").head @controllers.Ranking.specs.get(report.spec)</td>
 					<td>@report.dps</td>
 					<td><a href="@controllers.Ranking.reportUrl.replaceAll("REPORT_ID", report.reportId)" target="_blank">WoL</a></td>

@@ -41,6 +41,7 @@ GET		/admin/ranking					controllers.Administration.ranking
 POST	/admin/startCrawl				controllers.Administration.startCrawl
 POST	/admin/crawlErrors				controllers.Administration.crawlErrors
 POST	/admin/crawlerror/delete/:id	controllers.Administration.deleteError(id: Long)
+GET		/admin/getGuilds				controllers.Administration.getPlayerGuilds
 
 GET		/admin/crawlStatus				controllers.Administration.crawlStatus
 

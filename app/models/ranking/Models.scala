@@ -135,6 +135,8 @@ object Report {
         		    WHERE boss_id={boss_id}
         		    GROUP BY player_name, spec
         		) temp ON d.player_name=temp.player_name AND d.spec=temp.spec AND d.value=temp.value
+    		  	INNER JOIN player_info
+    		  	ON d.player_name=player_info.name
         		WHERE d.boss_id={boss_id}
         		ORDER BY value DESC
     		    LIMIT {limit}
@@ -159,6 +161,8 @@ object Report {
         		    WHERE boss_id={boss_id}
         		    GROUP BY player_name, spec
         		) temp ON d.player_name=temp.player_name AND d.spec=temp.spec AND d.value=temp.value
+    		  	INNER JOIN player_info
+    		  	ON d.player_name=player_info.name
         		WHERE d.boss_id={boss_id} AND d.spec={spec}
         		ORDER BY value DESC
     		    LIMIT {limit}
@@ -168,6 +172,12 @@ object Report {
         'limit -> limit).as(simple *)
     } map {
       el => Report(el.playerName, el.spec, el.value, boss, el.reportId)
+    }
+  }
+  
+  def getPlayerNames: List[String] = {
+    DB.withConnection { implicit c =>
+      SQL("SELECT player_name FROM dps").as(get[String]("player_name")*)
     }
   }
 }
