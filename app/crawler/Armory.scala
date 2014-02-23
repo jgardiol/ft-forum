@@ -2,7 +2,7 @@ package crawler
 
 import play.api.libs.ws._
 import scala.concurrent.Future
-import scala.util.{Success, Failure}
+import scala.util.{ Success, Failure }
 import play.api.libs.json._
 
 import models.ranking._
@@ -23,16 +23,21 @@ object Armory {
 
     implicit val context = scala.concurrent.ExecutionContext.Implicits.global
 
-    val futureResult: Future[String] = getResponse(name).map {
-      response => (response.json \ "guild" \ "name").as[String]
-    }
-    
-    futureResult onComplete {
-      case Success(guildname) => Logger.info("guildname: " + guildname)
+    getResponse(name) onComplete {
+      case Success(response) => {
+        Logger.info("status: " + response.status)
+        if (response.status == 200) {
+          val guildname = (response.json \ "guild" \ "name").as[String]
+          Logger.info("guildname: " + guildname)
+        }
+      }
       case Failure(t) => Logger.error("Error while getting info for " + name + ", message: " + t.getMessage())
     }
-
-    Logger.info("Done processing " + name)
   }
+
+  // For each player, get guild name.
+  // On error:
+  // - 404: remove player from DB
+  // - 5xx: log, ignore, retry later
 
 }
