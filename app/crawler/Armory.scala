@@ -17,7 +17,6 @@ object Armory {
 
   def processPlayer(name: String) {
     import play.api._
-    Logger.info("Processing " + name)
 
     val response = getResponse(name)
 
@@ -26,25 +25,34 @@ object Armory {
     getResponse(name) onComplete {
       case Success(response) => {
         if (response.status == 200) {
-          val guildname = (response.json \ "guild" \ "name").as[String]
-          PlayerInfo.getByName(name) match {
-            case Some(player) => if(player.guild != guildname) PlayerInfo.updateGuild(name, guildname)
-            case None => PlayerInfo.create(name, guildname)
+          try {
+            val guildname = (response.json \ "guild" \ "name").as[String]
+            PlayerInfo.getByName(name) match {
+              case Some(player) => if (player.guild != guildname) PlayerInfo.updateGuild(name, guildname)
+              case None => PlayerInfo.create(name, guildname)
+            }
+          } catch {
+            case e: Throwable => Logger.warn("woopsie! " + e.getMessage())
           }
-        } else if(response.status == 404) {
+        } else if (response.status == 404) {
           PlayerInfo.getByName(name).map(p => PlayerInfo.delete(p.id))
         } else {
-          val message = (response.json \ "reason").as[String]
-          Logger.error("Error: " + message)
+          try {
+            val message = (response.json \ "reason").as[String]
+            Logger.warn("Error: " + message)
+          } catch {
+            case e: Throwable => Logger.warn("woopsie! " + e.getMessage())
+          }
         }
       }
       case Failure(t) => Logger.error("Error while getting info for " + name + ", message: " + t.getMessage())
     }
   }
-  
+
   def processPlayers(names: List[String]) {
-    for(name <- names) {
+    for (name <- names) {
       processPlayer(name)
+      Thread.sleep(500)
     }
   }
 }
