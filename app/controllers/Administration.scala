@@ -118,7 +118,7 @@ object Administration extends Utils {
           Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission créée.")
         })
   }
-  
+
   val updatePermissionForm = Form(single("permission" -> number))
 
   def updatePermission(roleId: Long, forumId: Long) = AdminAction { user =>
@@ -133,19 +133,15 @@ object Administration extends Utils {
         })
   }
 
-  def deletePermission(roleId: Long, forumId: Long) = AdminAction { user => implicit request =>
-    Permission.delete(roleId, forumId)
-    Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission supprimée.")
+  def deletePermission(roleId: Long, forumId: Long) = AdminAction { user =>
+    implicit request =>
+      Permission.delete(roleId, forumId)
+      Redirect(routes.Administration.forumadmin).flashing("success" -> "Permission supprimée.")
   }
 
   def ranking = AdminAction { user =>
     implicit request =>
       WithUri(views.html.ranking.rankingadmin(CrawlError.all(), user))
-  }
-  
-  def getPlayerGuilds = AdminAction { user => implicit request =>    
-    Armory.processPlayers(models.ranking.Report.getPlayerNames)
-    Redirect(routes.Administration.ranking).flashing("success" -> "Players are being processed")
   }
 
   def crawlStatus = Action {
@@ -192,12 +188,19 @@ object Administration extends Utils {
       if (!isCrawling) {
         isCrawling = true
 
-        val f = scala.concurrent.Future { Crawler.crawl }
-
-        f onComplete {
+        Future {
+          Crawler.crawl
+        } onComplete {
           case _ => {
             Logger.info("crawling finished")
-            isCrawling = false
+            Future {
+              Armory.processPlayers(models.ranking.Report.getPlayerNames)
+            } onComplete {
+              case _ => {
+                isCrawling = false
+                Logger.info("finished fetching guilds")
+              }
+            }
           }
         }
         Redirect(currentUri).flashing("success" -> "Crawl started")

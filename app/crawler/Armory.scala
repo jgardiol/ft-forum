@@ -25,15 +25,22 @@ object Armory {
     getResponse(name) onComplete {
       case Success(response) => {
         if (response.status == 200) {
-          try {
-            val guildname = (response.json \ "guild" \ "name").as[String]
-            PlayerInfo.getByName(name) match {
-              case Some(player) => if (player.guild != guildname) PlayerInfo.updateGuild(name, guildname)
-              case None => PlayerInfo.create(name, guildname)
+          val guildname = (response.json \ "guild" \ "name").asOpt[String].getOrElse("")
+          val playername = (response.json \ "name").asOpt[String]
+
+          playername match {
+            case Some(_) => {
+              PlayerInfo.getByName(name) match {
+                case Some(player) => if (player.guild != guildname) PlayerInfo.updateGuild(name, guildname)
+                case None => PlayerInfo.create(name, guildname)
+              }
             }
-          } catch {
-            case e: Throwable => Logger.warn("woopsie! (for " + name + ") " + e.getMessage())
+            case None => {
+              // No player name means the player isn't on the server
+              PlayerInfo.getByName(name).map(p => PlayerInfo.delete(p.id))
+            }
           }
+
         } else if (response.status == 404) {
           PlayerInfo.getByName(name).map(p => PlayerInfo.delete(p.id))
         } else {
@@ -50,13 +57,9 @@ object Armory {
   }
 
   def processPlayers(names: List[String]) {
-    import play.api._
-    Logger.info("Processing: " + names.size + " names")
     for (name <- names) {
       processPlayer(name)
-      Thread.sleep(500)
+      Thread.sleep(1000)
     }
-    
-    Logger.info("Done looping through players")
   }
 }

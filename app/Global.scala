@@ -2,12 +2,14 @@ import play.api._
 import play.api.mvc._
 import models._
 import models.ranking._
+import crawler.CrawlInfo
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
     if(Forum.all.isEmpty) createAdmin()
     if(Boss.all.isEmpty) createBosses()
     if(Forum.all.isEmpty) createForums()
+    if(CrawlInfo.all.isEmpty) createInfo()
   }
   
   def createBosses() {
@@ -27,5 +29,9 @@ object Global extends GlobalSettings {
   def createForums() {
     Forum.create("Général", "Discussion Générale")
     Forum.create("Recrutement", "On recrute")
+  }
+  
+  def createInfo() {
+    CrawlInfo.create(new java.util.Date)
   }
 }

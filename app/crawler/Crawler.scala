@@ -170,6 +170,9 @@ object Crawler {
 
         Thread.sleep(10000L)
       }
+
+      CrawlInfo.create(new java.util.Date())
+
     } catch {
       case e: HttpStatusException => CrawlError.create(e.getMessage(), Illidan_URL)
       case e: java.net.SocketTimeoutException => CrawlError.create(e.getMessage(), Illidan_URL)
@@ -217,7 +220,7 @@ object Crawler {
       // Extract wolId from report url
       val pattern(suffix) = error.url
       val wolId: String = suffix.split("/").head
-      
+
       processReport(Report(wolId, new java.util.Date()))
       CrawlError.delete(error.id)
       Thread.sleep(10000L)
@@ -259,6 +262,32 @@ object CrawlError {
   def delete(id: Long) {
     DB.withConnection { implicit c =>
       SQL("DELETE FROM crawl_errors WHERE id={id}").on('id -> id).executeUpdate()
+    }
+  }
+}
+
+object CrawlInfo {
+  import play.api.db._
+  import play.api.Play.current
+
+  import anorm._
+  import anorm.SqlParser._
+
+  def all(): List[java.util.Date] = {
+    DB.withConnection { implicit c =>
+      SQL("SELECT * FROM crawl_info").as(get[java.util.Date]("last")*)
+    }
+  }
+
+  def create(last: java.util.Date) {
+    DB.withConnection { implicit c =>
+      SQL("INSERT INTO crawl_info(last) VALUES({last})").on('last -> last).executeUpdate()
+    }
+  }
+
+  def lastCrawl(): java.util.Date = {
+    DB.withConnection { implicit c =>
+      SQL("SELECT last FROM crawl_info ORDER BY last DESC LIMIT 1").as(get[java.util.Date]("last").single)
     }
   }
 }

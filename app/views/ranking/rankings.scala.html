@@ -1,8 +1,19 @@
-@(reports: List[models.ranking.Report], boss: String, difficulty: String, spec: String, user: User)
+@(reports: List[models.ranking.Report], last: java.util.Date, boss: String, difficulty: String, spec: String, user: User)
 
 @main("Rankings", user) {
 
-<div class="container">	
+<div class="container">
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="alert alert-info alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				Rankings DPS bas&eacute;s sur <a href="http://www.worldoflogs.com" target="_blank">WoL</a>.
+				Derni&egrave;re mise &agrave; jour le @controllers.Application.formatted(last)
+			</div>
+		</div>
+	</div>
+
 	<div class="rankings">
 		<ul class="nav nav-pills">
 			<li>

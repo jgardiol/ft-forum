@@ -19,12 +19,11 @@ object Ranking extends Utils {
           case "all" => Report.getBestReports(boss, 100)
           case spec => Report.getBestReports(boss, 100, spec)
         }
-
       }
       case None => Nil
     }
     
-    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
+    WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, user))
   }
   
   def player(name: String, boss: String, difficulty: String, spec: String) = IsAuthenticated { user => implicit request =>
@@ -34,7 +33,7 @@ object Ranking extends Utils {
       case None => Nil
     }
     
-    WithUri(views.html.ranking.rankings(reports, boss, difficulty, spec, user))
+    WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, user))
   }
 
   val reportUrl = "http://worldoflogs.com/reports/REPORT_ID/"
