@@ -2,6 +2,7 @@ package crawler
 
 import play.api.libs.ws._
 import scala.concurrent.Future
+import scala.util.{Success, Failure}
 import play.api.libs.json._
 
 import models.ranking._
@@ -26,7 +27,10 @@ object Armory {
       response => (response.json \ "guild" \ "name").as[String]
     }
     
-    futureResult.map(value => Logger.info("guildname: " + value))
+    futureResult onComplete {
+      case Success(guildname) => Logger.info("guildname: " + guildname)
+      case Failure(t) => Logger.error("Error while getting info for " + name + ", message: " + t.getMessage())
+    }
 
     Logger.info("Done processing " + name)
   }

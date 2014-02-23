@@ -204,6 +204,7 @@ object Application extends Utils {
     import crawler._
     
     Armory.processPlayer("Healena")
+    Armory.processPlayer("Hurrdurr")
     
     Ok
   }
