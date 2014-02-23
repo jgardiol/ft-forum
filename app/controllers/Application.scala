@@ -199,4 +199,12 @@ object Application extends Utils {
         case None => NotFound
       }
   }
+  
+  def testing = Action {
+    import crawler._
+    
+    Armory.processPlayer("Healena")
+    
+    Ok
+  }
 }
