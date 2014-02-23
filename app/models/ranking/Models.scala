@@ -177,7 +177,7 @@ object Report {
   
   def getPlayerNames: List[String] = {
     DB.withConnection { implicit c =>
-      SQL("SELECT player_name FROM dps").as(get[String]("player_name")*)
+      SQL("SELECT player_name FROM dps GROUP BY player_name").as(get[String]("player_name")*)
     }
   }
 }

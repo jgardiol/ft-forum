@@ -32,7 +32,7 @@ object Armory {
               case None => PlayerInfo.create(name, guildname)
             }
           } catch {
-            case e: Throwable => Logger.warn("woopsie! " + e.getMessage())
+            case e: Throwable => Logger.warn("woopsie! (for " + name + ") " + e.getMessage())
           }
         } else if (response.status == 404) {
           PlayerInfo.getByName(name).map(p => PlayerInfo.delete(p.id))
@@ -41,7 +41,7 @@ object Armory {
             val message = (response.json \ "reason").as[String]
             Logger.warn("Error: " + message)
           } catch {
-            case e: Throwable => Logger.warn("woopsie! " + e.getMessage())
+            case e: Throwable => Logger.warn("woopsie! (for " + name + ") " + e.getMessage())
           }
         }
       }
@@ -50,9 +50,13 @@ object Armory {
   }
 
   def processPlayers(names: List[String]) {
+    import play.api._
+    Logger.info("Processing: " + names.size + " names")
     for (name <- names) {
       processPlayer(name)
       Thread.sleep(500)
     }
+    
+    Logger.info("Done looping through players")
   }
 }
