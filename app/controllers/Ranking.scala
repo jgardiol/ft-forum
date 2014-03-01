@@ -11,29 +11,35 @@ import crawler._
 
 object Ranking extends Utils {
 
-  def rankings(boss: String, difficulty: String, spec: String) = IsAuthenticated { user => implicit request =>
-    val b = Boss.getByName(boss, difficulty)
-    val reports = Boss.getByName(boss, difficulty) match {
-      case Some(boss) => {
-        spec match {
-          case "all" => Report.getBestReports(boss, 100)
-          case spec => Report.getBestReports(boss, 100, spec)
-        }
+  def rankings(boss: String, difficulty: String, hps: Boolean) = IsAuthenticated { user =>
+    implicit request =>
+      val reports = Boss.getByName(boss, difficulty) match {
+        case Some(boss) => Report.getBestReports(boss, 100, hps)
+        case None => Nil
       }
-      case None => Nil
-    }
-    
-    WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, user))
+
+      WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, "all", hps, user))
   }
-  
-  def player(name: String, boss: String, difficulty: String, spec: String) = IsAuthenticated { user => implicit request =>
-    val b = Boss.getByName(boss, difficulty)
-    val reports = Boss.getByName(boss, difficulty) match {
-      case Some(boss) => Report.getReports(boss, name)
-      case None => Nil
-    }
-    
-    WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, user))
+
+  def specRankings(boss: String, difficulty: String, spec: String) = IsAuthenticated { user =>
+    implicit request =>
+      val reports = Boss.getByName(boss, difficulty) match {
+        case Some(boss) => Report.getBestReports(boss, 100, spec)
+        case None => Nil
+      }
+
+      WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, false, user))
+  }
+
+  def player(name: String, boss: String, difficulty: String, spec: String) = IsAuthenticated { user =>
+    implicit request =>
+      val b = Boss.getByName(boss, difficulty)
+      val reports = Boss.getByName(boss, difficulty) match {
+        case Some(boss) => Report.getReports(boss, name)
+        case None => Nil
+      }
+
+      WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, false, user))
   }
 
   val reportUrl = "http://worldoflogs.com/reports/REPORT_ID/"

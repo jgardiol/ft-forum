@@ -1,4 +1,4 @@
-@(reports: List[models.ranking.Report], last: java.util.Date, boss: String, difficulty: String, spec: String, user: User)
+@(reports: List[models.ranking.Report], last: java.util.Date, boss: String, difficulty: String, spec: String, hps: Boolean, user: User)
 
 @main("Rankings", user) {
 
@@ -21,15 +21,23 @@
 				<a href="#">@boss <span class="caret"/></a>
 				<ul class="dropdown-menu" role="menu">
 					@controllers.Ranking.bosses.map { b =>
-						<li><a href="@routes.Ranking.rankings(b,difficulty,spec)">@b</a></li>
-					}		
+						@if(spec == "all") {
+							<li><a href="@routes.Ranking.rankings(b,difficulty, hps)">@b</a></li>
+						} else {
+							<li><a href="@routes.Ranking.specRankings(b, difficulty, spec)">@b</a></li>
+						}
+					}
 				</ul>
 			</li>
 			<li>
 				<a href="#">@difficulty <span class="caret"/></a>
 				<ul class="dropdown-menu" role="menu">
 					@controllers.Ranking.difficulties.map { d =>
-						<li><a href="@routes.Ranking.rankings(boss,d,spec)">@d</a></li>
+						@if(spec == "all") {
+							<li><a href="@routes.Ranking.rankings(boss,d,hps)">@d</a></li>
+						} else {
+							<li><a href="@routes.Ranking.specRankings(boss,d,spec)">@d</a></li>
+						}
 					}
 				</ul>
 			</li>
@@ -42,7 +50,7 @@
 					} <span class="caret"/>
 				</a>
 				<ul class="dropdown-menu">
-					<li><a href="@routes.Ranking.rankings(boss, difficulty, "all")">All Specs</a></li>
+					<li><a href="@routes.Ranking.rankings(boss, difficulty, hps)">All Specs</a></li>
 					<li class="divider"></li>
 					@controllers.Ranking.classes.map { c =>
 						<li>
@@ -58,6 +66,27 @@
 					}
 				</ul>
 			</li>
+			@if(spec == "all") {
+			<li>
+				<a href="#">
+					@if(hps) {
+						HPS
+					} else {
+						DPS
+					}
+					<span class="caret"/>
+				</a>
+				<ul class="dropdown-menu">
+					<li>
+					@if(hps) {
+						<a href="@routes.Ranking.rankings(boss, difficulty, !hps)">DPS</a>
+					} else {
+						<a href="@routes.Ranking.rankings(boss, difficulty, !hps)">HPS</a>
+					}
+					</li>
+				</ul>
+			</li>
+			}
 		</ul>
 	</div>
 	
@@ -68,7 +97,7 @@
 					<th>Rank</th>
 					<th>Name</th>
 					<th>Spec & Class</th>
-					<th>Dps</th>
+					<th>DPS / HPS</th>
 					<th>Report</th>
 				</tr>
 			</thead>
