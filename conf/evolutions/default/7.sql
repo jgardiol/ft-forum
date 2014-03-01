@@ -4,7 +4,7 @@
 
 ALTER TABLE dps ADD COLUMN is_healer boolean NOT NULL DEFAULT 'false';
 
-UPDATE TABLE dps SET is_healer='true' 
+UPDATE dps SET is_healer='true' 
 WHERE spec='Restoration 204'
 OR spec='Holy 501'
 OR spec='Discipline 601'
