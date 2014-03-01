@@ -14,4 +14,4 @@ OR spec='Mistweaver 1102';
 
 # --- !Downs
 
-ALTER TABLE dps DROP COLUMN is_healer IF EXISTS;
+ALTER TABLE dps DROP COLUMN is_healer;
