@@ -56,7 +56,7 @@
 							<a href="#">@c &raquo;</a>
 							<ul class="dropdown-menu">
 								@for(spec <- controllers.Ranking.specs.filter( kv => kv._2 == c)) {
-									<li><a href="@routes.Ranking.rankings(boss, difficulty, spec._1)">
+									<li><a href="@routes.Ranking.specRankings(boss, difficulty, spec._1)">
 										@spec._1.split(" ").head
 									</a></li>
 								}
