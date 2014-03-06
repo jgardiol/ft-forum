@@ -17,7 +17,12 @@ object Ranking extends Utils {
       roles.get(role) match {
         case Some(specs) => {
           val reports = Boss.getByName(boss, difficulty) match {
-            case Some(boss) => Report.getBestReports(boss, 100).filter(r => specs.contains(r.spec))
+            case Some(boss) => {
+              Logger.info("found boss " + boss.name)
+              val r = Report.getBestReports(boss, 100)
+              Logger.info("found " + r.size + " reports")
+              r.filter(r => specs.contains(r.spec))
+            }
             case None => Nil
           }
 
