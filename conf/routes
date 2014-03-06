@@ -46,17 +46,15 @@ GET		/admin/crawlStatus				controllers.Administration.crawlStatus
 
 
 # Authentication
-GET		/logout						controllers.Application.logout
-POST	/login						controllers.Application.login
-POST	/signup						controllers.Application.signup
+GET		/logout										controllers.Application.logout
+POST	/login										controllers.Application.login
+POST	/signup										controllers.Application.signup
 
 # Ranking
-GET		/rankings/:boss/:difficulty/dps				controllers.Ranking.rankings(boss: String, difficulty: String, hps: Boolean = false)
-GET		/rankings/:boss/:difficulty/hps				controllers.Ranking.rankings(boss: String, difficulty: String, hps: Boolean = true)
+GET		/rankings/:boss/:difficulty/dps				controllers.Ranking.rankings(boss: String, difficulty: String, role: String = "dps")
+GET		/rankings/:boss/:difficulty/healers			controllers.Ranking.rankings(boss: String, difficulty: String, role: String = "healers")
+GET		/rankings/:boss/:difficulty/tanks			controllers.Ranking.rankings(boss: String, difficulty: String, role: String = "tanks")
 GET		/rankings/:boss/:difficulty/:spec			controllers.Ranking.specRankings(boss: String, difficulty: String, spec: String)
-
-GET		/player/:name						controllers.Ranking.player(name: String, boss: String = "Immerseus", difficulty: String = "10H", spec: String = "all")
-GET		/player/:name/:boss/:difficulty/:spec		controllers.Ranking.player(name: String, boss: String, difficulty: String, spec: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

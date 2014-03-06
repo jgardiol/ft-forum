@@ -123,7 +123,7 @@ object Report {
     }
   }
 
-  def getBestReports(boss: Boss, limit: Int, hps: Boolean): List[Report] = {
+  def getBestReports(boss: Boss, limit: Int): List[Report] = {
     DB.withConnection { implicit c =>
       SQL("""
         		SELECT DISTINCT ON(d.value) d.*
@@ -137,13 +137,12 @@ object Report {
         		) temp ON d.player_name=temp.player_name AND d.spec=temp.spec AND d.value=temp.value
     		  	INNER JOIN player_info
     		  	ON d.player_name=player_info.name
-        		WHERE d.boss_id={boss_id} AND is_healer={is_healer}
+        		WHERE d.boss_id={boss_id}
         		ORDER BY value DESC
     		    LIMIT {limit}
         	""").on(
         'boss_id -> boss.id,
-        'limit -> limit,
-        'is_healer -> hps).as(simple *)
+        'limit -> limit).as(simple *)
     } map {
       el => Report(el.playerName, el.spec, el.value, boss, el.reportId)
     }

@@ -1,4 +1,4 @@
-@(reports: List[models.ranking.Report], last: java.util.Date, boss: String, difficulty: String, spec: String, hps: Boolean, user: User)
+@(reports: List[models.ranking.Report], last: java.util.Date, boss: String, difficulty: String, spec: String, role: String, user: User)
 
 @main("Rankings", user) {
 
@@ -21,7 +21,7 @@
 				<ul class="dropdown-menu" role="menu">
 					@controllers.Ranking.bosses.map { b =>
 						@if(spec == "all") {
-							<li><a href="@routes.Ranking.rankings(b,difficulty, hps)">@b</a></li>
+							<li><a href="@routes.Ranking.rankings(b,difficulty, role)">@b</a></li>
 						} else {
 							<li><a href="@routes.Ranking.specRankings(b, difficulty, spec)">@b</a></li>
 						}
@@ -33,7 +33,7 @@
 				<ul class="dropdown-menu" role="menu">
 					@controllers.Ranking.difficulties.map { d =>
 						@if(spec == "all") {
-							<li><a href="@routes.Ranking.rankings(boss,d,hps)">@d</a></li>
+							<li><a href="@routes.Ranking.rankings(boss,d,role)">@d</a></li>
 						} else {
 							<li><a href="@routes.Ranking.specRankings(boss,d,spec)">@d</a></li>
 						}
@@ -49,7 +49,7 @@
 					} <span class="caret"/>
 				</a>
 				<ul class="dropdown-menu">
-					<li><a href="@routes.Ranking.rankings(boss, difficulty, hps)">All Specs</a></li>
+					<li><a href="@routes.Ranking.rankings(boss, difficulty, role)">All Specs</a></li>
 					<li class="divider"></li>
 					@controllers.Ranking.classes.map { c =>
 						<li>
@@ -68,21 +68,13 @@
 			@if(spec == "all") {
 			<li>
 				<a href="#">
-					@if(hps) {
-						HPS
-					} else {
-						DPS
-					}
+					@role
 					<span class="caret"/>
 				</a>
 				<ul class="dropdown-menu">
-					<li>
-					@if(hps) {
-						<a href="@routes.Ranking.rankings(boss, difficulty, !hps)">DPS</a>
-					} else {
-						<a href="@routes.Ranking.rankings(boss, difficulty, !hps)">HPS</a>
-					}
-					</li>
+					<li><a href="@routes.Ranking.rankings(boss, difficulty, "dps")">dps</a></li>
+					<li><a href="@routes.Ranking.rankings(boss, difficulty, "tanks")">tanks</a></li>
+					<li><a href="@routes.Ranking.rankings(boss, difficulty, "healers")">healers</a></li>
 				</ul>
 			</li>
 			}
