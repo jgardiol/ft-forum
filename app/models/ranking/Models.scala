@@ -47,16 +47,25 @@ object Boss {
 case class Report(playerName: String, spec: String, dps: Double, boss: Boss, reportId: String)
 
 object Report {
-  case class Dps(id: Long, value: Double, spec: String, reportId: String, playerName: String, bossId: Long)
+  case class Dps(id: Long, value: Double, spec: String, role: Role, reportId: String, playerName: String, bossId: Long)
   val simple =
     get[Long]("id") ~
       get[Double]("value") ~
       get[String]("spec") ~
+      get[Long]("role") ~ 
       get[String]("report_id") ~
       get[String]("player_name") ~
       get[Long]("boss_id") map {
-        case id ~ value ~ spec ~ report_id ~ player_id ~ boss_id => Dps(id, value, spec, report_id, player_id, boss_id)
+        case id ~ value ~ spec ~ role ~ report_id ~ player_id ~ boss_id => Dps(id, value, spec, role, report_id, player_id, boss_id)
       }
+  
+  type Role = Long
+  
+  val DPS = 0
+  val Healer = 1
+  val Tank = 2
+  
+  val roles = Map("dps" -> DPS, "healers" -> Healer, "tanks" -> Tank)
 
   def all() = {
     DB.withConnection { implicit c =>
@@ -68,8 +77,8 @@ object Report {
   def create(value: Double, spec: String, reportId: String, playerName: String, bossId: Long) {
     DB.withConnection { implicit c =>
       SQL("""
-				INSERT INTO dps(value, spec, report_id, player_name, boss_id) 
-				SELECT {value}, {spec}, {report_id}, {player_name}, {boss_id} 
+				INSERT INTO dps(value, spec, role, report_id, player_name, boss_id) 
+				SELECT {value}, {spec}, {role}, {report_id}, {player_name}, {boss_id} 
 				WHERE NOT EXISTS 
 					(SELECT * 
 					 FROM dps 
@@ -77,6 +86,7 @@ object Report {
 			""").on(
         'value -> value,
         'spec -> spec,
+        'role -> specRoles.get(spec).get,
         'report_id -> reportId,
         'player_name -> playerName,
         'boss_id -> bossId).executeUpdate()
@@ -123,7 +133,7 @@ object Report {
     }
   }
 
-  def getBestReports(boss: Boss, limit: Int): List[Report] = {
+  def getBestReports(boss: Boss, limit: Int, role: Int): List[Report] = {
     DB.withConnection { implicit c =>
       SQL("""
         		SELECT DISTINCT ON(d.value) d.*
@@ -137,12 +147,13 @@ object Report {
         		) temp ON d.player_name=temp.player_name AND d.spec=temp.spec AND d.value=temp.value
     		  	INNER JOIN player_info
     		  	ON d.player_name=player_info.name
-        		WHERE d.boss_id={boss_id}
+        		WHERE d.boss_id={boss_id} AND role={role}
         		ORDER BY value DESC
     		    LIMIT {limit}
         	""").on(
         'boss_id -> boss.id,
-        'limit -> limit).as(simple *)
+        'limit -> limit,
+        'role -> role).as(simple *)
     } map {
       el => Report(el.playerName, el.spec, el.value, boss, el.reportId)
     }
@@ -180,6 +191,42 @@ object Report {
       SQL("SELECT player_name FROM dps GROUP BY player_name").as(get[String]("player_name")*)
     }
   }
+  
+  val specRoles = Map(
+    "Blood 101" -> Tank,
+    "Frost 102" -> DPS,
+    "Unholy 103" -> DPS,
+    "Balance 201" -> DPS,
+    "Feral/Cat 202" -> DPS,
+    "Feral/Bear 203" -> Tank,
+    "Restoration 204" -> Healer,
+    "Beast Mastery 301" -> DPS,
+    "Marksmanship 302" -> DPS,
+    "Survival 303" -> DPS,
+    "Arcane 401" -> DPS,
+    "Fire 402" -> DPS,
+    "Frost 403" -> DPS,
+    "Holy 501" -> Healer,
+    "Protection 502" -> Tank,
+    "Retribution 503" -> DPS,
+    "Discipline 601" -> Healer,
+    "Holy 602" -> Healer,
+    "Shadow 603" -> DPS,
+    "Assassination 701" -> DPS,
+    "Combat 702" -> DPS,
+    "Subtlety 703" -> DPS,
+    "Elemental 801" -> DPS,
+    "Enhancement 802" -> DPS,
+    "Restoration 803" -> Healer,
+    "Affliction 901" -> DPS,
+    "Demonology 902" -> DPS,
+    "Destruction 903" -> DPS,
+    "Arms 1001" -> DPS,
+    "Fury 1002" -> DPS,
+    "Protection 1003" -> Tank,
+    "Brewmaster 1101" -> Tank,
+    "Mistweaver 1102" -> Healer,
+    "Windwalker 1103" -> DPS)
 }
 
 case class Guild(id: Long, name: String, wolId: String, lastReport: java.util.Date)
