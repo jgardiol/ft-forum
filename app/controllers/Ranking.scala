@@ -17,13 +17,13 @@ object Ranking extends Utils {
       roles.get(role) match {
         case Some(specs) => {
           val reports = Boss.getByName(boss, difficulty) match {
-            case Some(boss) => Report.getBestReports(boss, 100).filter(specs.contains(_))
+            case Some(boss) => Report.getBestReports(boss, 100).filter(r => specs.contains(r.spec))
             case None => Nil
           }
 
           WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, "all", role, user))
         }
-        case _ => NotFound
+        case None => NotFound
       }
   }
 
