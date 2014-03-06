@@ -13,6 +13,10 @@ object Ranking extends Utils {
 
   def rankings(boss: String, difficulty: String, role: String) = IsAuthenticated { user =>
     implicit request =>
+      
+      Logger.info(roles.get("dps") + "")
+      Logger.info(roles.get("fail") + "")
+      Logger.info(roles.get(role) + "")
 
       roles.get(role) match {
         case Some(specs) => {
