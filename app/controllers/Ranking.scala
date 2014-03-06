@@ -13,7 +13,7 @@ object Ranking extends Utils {
 
   def rankings(boss: String, difficulty: String, role: String) = IsAuthenticated { user =>
     implicit request =>
-      
+
       Logger.info(roles.get("dps") + "")
       Logger.info(roles.get("fail") + "")
       Logger.info(roles.get(role) + "")
@@ -21,12 +21,7 @@ object Ranking extends Utils {
       roles.get(role) match {
         case Some(specs) => {
           val reports = Boss.getByName(boss, difficulty) match {
-            case Some(boss) => {
-              Logger.info("found boss " + boss.name)
-              val r = Report.getBestReports(boss, 100)
-              Logger.info("found " + r.size + " reports")
-              r.filter(r => specs.contains(r.spec))
-            }
+            case Some(boss) => Report.getBestReports(boss, 100).filter(r => specs.contains(r.spec))
             case None => Nil
           }
 
@@ -101,13 +96,9 @@ object Ranking extends Utils {
     "Windwalker 1103" -> "Monk")
 
   val roles = Map(
-    "dps" -> dd,
-    "tanks" -> tanks,
-    "healers" -> healers)
-
-  val dd = List("Frost 102", "Unholy 103", "Balance 201", "Feral/Cat 202", "Beast Mastery 301", "Marksmanship 302", "Survival 303", "Arcane 401", "Fire 402", "Frost 403", "Retribution 503", "Shadow 603", "Assassination 701", "Combat 702", "Subtlety 703", "Elemental 801", "Enhancement 802", "Affliction 901", "Demonology 902", "Destruction 903", "Arms 1001", "Fury 1002", "Windwalker 1103")
-  val tanks = List("Blood 101", "Feral/Bear 203", "Protection 502", "Protection 1003", "Brewmaster 1101")
-  val healers = List("Restoration 204", "Holy 501", "Discipline 601", "Holy 602", "Restoration 803", "Mistweaver 1102")
+    "dps" -> List("Frost 102", "Unholy 103", "Balance 201", "Feral/Cat 202", "Beast Mastery 301", "Marksmanship 302", "Survival 303", "Arcane 401", "Fire 402", "Frost 403", "Retribution 503", "Shadow 603", "Assassination 701", "Combat 702", "Subtlety 703", "Elemental 801", "Enhancement 802", "Affliction 901", "Demonology 902", "Destruction 903", "Arms 1001", "Fury 1002", "Windwalker 1103"),
+    "tanks" -> List("Blood 101", "Feral/Bear 203", "Protection 502", "Protection 1003", "Brewmaster 1101"),
+    "healers" -> List("Restoration 204", "Holy 501", "Discipline 601", "Holy 602", "Restoration 803", "Mistweaver 1102"))
 
   val difficulties = List("10N", "25N", "10H", "25H", "25L")
 }
