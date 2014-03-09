@@ -34,7 +34,7 @@ object Ranking extends Utils {
         case None => Nil
       }
 
-      WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, "", user))
+      WithUri(views.html.ranking.rankings(reports, CrawlInfo.lastCrawl(), boss, difficulty, spec, Report.reverse.get(Report.specRoles.get(spec).getOrElse(0)).getOrElse("dps"), user))
   }
 
   val reportUrl = "http://worldoflogs.com/reports/REPORT_ID/"

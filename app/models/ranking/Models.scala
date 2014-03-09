@@ -66,6 +66,7 @@ object Report {
   val Tank = 2
   
   val roles = Map("dps" -> DPS, "healers" -> Healer, "tanks" -> Tank)
+  val reverse = Map(DPS -> "dps", Healer -> "healers", Tank -> "tanks")
 
   def all() = {
     DB.withConnection { implicit c =>
